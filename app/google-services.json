@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "346163623434",
+    "firebase_url": "https://taxo-93481.firebaseio.com",
+    "project_id": "taxo-93481",
+    "storage_bucket": "taxo-93481.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346163623434:android:115474a9391ea963",
+        "android_client_info": {
+          "package_name": "com.example.sveta.taxo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346163623434-69426m7vgqii86k3e11k1lv60bu5op93.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sveta.taxo",
+            "certificate_hash": "82C226E4110401BE7C5BD9D32DFE50ECE0785335"
+          }
+        },
+        {
+          "client_id": "346163623434-s99gp2o74agcku8q5f1u2opjudlgkf7n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVbr9fIspoztocLmdm-OcOngdqCX1X4kY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346163623434-s99gp2o74agcku8q5f1u2opjudlgkf7n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

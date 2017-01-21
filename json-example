@@ -1,0 +1,13 @@
+{
+  "orders": {
+    "from": {
+      "street": "Gagarina",
+      "house": "95",
+      "entrance": "6"
+    },
+    "to": {
+      "street": "Shevchenka",
+      "house": "235"
+    }
+  }
+}

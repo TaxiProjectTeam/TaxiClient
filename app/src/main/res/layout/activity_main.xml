@@ -18,7 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:cameraZoom="13" />
+        app:cameraZoom="13"
+        app:cameraTargetLat="49.441153"
+        app:cameraTargetLng="32.064271"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,6 +60,7 @@
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/starting_address"
                     android:hint="@string/start_address"
                     style="@style/text_style"
                     android:gravity="start"

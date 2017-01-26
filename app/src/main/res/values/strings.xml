@@ -15,6 +15,6 @@
     <string name="car_brand">Марка автомобіля:</string>
     <string name="car_color">Колір:</string>
     <string name="car_number">Державний номер:</string>
-    <string name="add_address">Додати очку маршруту</string>
+    <string name="add_address">Додати точку маршруту</string>
     <string name="title_activity_maps">Map</string>
 </resources>

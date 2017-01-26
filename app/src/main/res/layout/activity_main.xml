@@ -50,37 +50,36 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="115dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/addresses_pool">
 
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/starting_address"
                     android:hint="@string/start_address"
-                    style="@style/text_style"
-                    android:gravity="start"
-                    android:textAppearance="?android:textAppearanceSmall"/>
+                    style="@style/hint_text_style"/>
 
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/destination_address"
                     android:hint="@string/destination_address"
-                    style="@style/text_style"
-                    android:gravity="start"
-                    android:textAppearance="?android:textAppearanceSmall"/>
+                    style="@style/hint_text_style"/>
 
-                <EditText
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:id="@+id/adding_address"
                     android:hint="@string/add_address"
-                    style="@style/text_style"
-                    android:gravity="start"
-                    android:textAppearance="?android:textAppearanceSmall"/>
+                    style="@style/hint_text_style"
+                    />
             </LinearLayout>
         </ScrollView>
 

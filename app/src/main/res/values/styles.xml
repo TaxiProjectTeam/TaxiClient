@@ -13,4 +13,11 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="hint_text_style">
+        <item name="android:textAppearance">?android:textAppearanceSmall</item>
+        <item name="android:color">@color/text_color</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">start</item>
+    </style>
+
 </resources>

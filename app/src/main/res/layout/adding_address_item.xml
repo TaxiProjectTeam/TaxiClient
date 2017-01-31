@@ -2,12 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/added_address">
+    android:id="@+id/added_address_line">
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/destination_address"
+        android:id="@+id/added_address"
         style="@style/hint_text_style" />
 
     <ImageView

@@ -1,7 +1,6 @@
 package com.example.sveta.taxo;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -30,12 +29,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.vision.text.Text;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.zip.Inflater;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -53,8 +51,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private EditText startingAddress;
     private EditText destinationAddress;
     private TextView addingAddress;
+    private EditText addedAddress;
     private ImageView targetLocation;
     private Button buttonOrder;
+
+    private Marker olderStartingMarker;
+    private Marker olderDestinationMarker;
+    private Marker olderAddingMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,15 +86,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Додавання рядка вводу адреси
                 final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.addresses_pool);
                 View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.adding_address_item, null);
-                final RelativeLayout editText = (RelativeLayout) view.findViewById(R.id.added_address);
-                linearLayout.addView(editText, linearLayout.getChildCount() - 1);
+
+                final RelativeLayout addedAddressLine = (RelativeLayout) view.findViewById(R.id.added_address_line);
+                addedAddress = (EditText) view.findViewById(R.id.added_address);
+                linearLayout.addView(addedAddressLine, linearLayout.getChildCount() - 2);
 
                 // Видалення доданого рядка вводу адреси
                 ImageView deleteIcon = (ImageView) view.findViewById(R.id.delete_icon);
                 deleteIcon.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        linearLayout.removeView(editText);
+                        linearLayout.removeView(addedAddressLine);
                     }
                 });
             }
@@ -108,20 +113,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 if (mapReady) {
                     marker = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    googleMap.addMarker(markerOptions.position(marker).title("Ви знаходитесь тут"));
+                    Marker olderMarker = googleMap.addMarker(markerOptions.position(marker).title("Ви знаходитесь тут"));
 
                     CameraPosition camera = CameraPosition.builder().target(marker).zoom(17).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
-                    // Парсинг геолокації в адресу
-                    Geocoder geocoder = new Geocoder(MainActivity.this);
-                    List<Address> addresses = null;
-                    try {
-                        addresses = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
-                    } catch (IOException e) {}
-                    String city = addresses.get(0).getLocality();
-                    String street = addresses.get(0).getAddressLine(0);
-                    startingAddress.setText(city + ", " + street);
+                    LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                    getAddress(latLng, startingAddress, olderStartingMarker);
+                    olderStartingMarker = olderMarker;
                 }
             }
         });
@@ -165,7 +164,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                googleMap.addMarker(markerOptions.position(latLng));
+                Marker olderMarker = googleMap.addMarker(markerOptions.position(latLng));
+                if (startingAddress.isFocused()) {
+                    getAddress(latLng, startingAddress, olderStartingMarker);
+                    olderStartingMarker = olderMarker;
+                }
+                else if (destinationAddress.isFocused()) {
+                    getAddress(latLng, destinationAddress, olderDestinationMarker);
+                    olderDestinationMarker = olderMarker;
+                }
+                else if (addedAddress.isFocused()) {
+                    getAddress(latLng, addedAddress, olderAddingMarker);
+                    olderAddingMarker = olderMarker;
+                }
             }
         });
 
@@ -192,5 +203,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    // Парсинг геолокації в адресу
+    private void getAddress(LatLng latLng, EditText editText, Marker olderMarker) {
+        Geocoder geocoder = new Geocoder(MainActivity.this);
+        List<Address> addresses = null;
+        try {
+            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException e) {}
+        if (olderMarker != null)
+            olderMarker.remove();
+        String city = addresses.get(0).getAddressLine(1);
+        String street = addresses.get(0).getAddressLine(0);
+        editText.setText(city + ", " + street);
     }
 }

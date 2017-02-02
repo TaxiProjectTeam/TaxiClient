@@ -1,7 +1,9 @@
-package com.example.sveta.taxo;
+package com.example.sveta.taxo.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.sveta.taxo.R;
 
 public class DetailOrderActivity extends AppCompatActivity {
 

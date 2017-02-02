@@ -1,4 +1,4 @@
-package com.example.sveta.taxo;
+package com.example.sveta.taxo.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 

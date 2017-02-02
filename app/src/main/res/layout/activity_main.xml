@@ -10,7 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context="com.example.sveta.taxo.MainActivity">
+    tools:context="com.example.sveta.taxo.activity.MainActivity">
 
     <fragment
         android:id="@+id/map"
@@ -48,40 +48,11 @@
                 android:layout_alignParentEnd="true"/>
         </RelativeLayout>
 
-        <ScrollView
+        <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="115dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/addresses_pool">
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/starting_address"
-                    android:hint="@string/start_address"
-                    style="@style/hint_text_style"/>
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/destination_address"
-                    android:hint="@string/destination_address"
-                    style="@style/hint_text_style"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:id="@+id/adding_address"
-                    android:hint="@string/add_address"
-                    style="@style/hint_text_style"
-                    />
-            </LinearLayout>
-        </ScrollView>
+            android:layout_height="115dp"
+            android:scrollbars="vertical"
+            android:id="@+id/recycler_view_address"/>
 
         <LinearLayout
             android:layout_width="match_parent"

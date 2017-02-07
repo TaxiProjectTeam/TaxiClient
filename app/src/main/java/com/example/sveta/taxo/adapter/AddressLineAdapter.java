@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.sveta.taxo.adapter.OnFocusItemListener;
 import com.example.sveta.taxo.R;
 import com.example.sveta.taxo.model.ModelAddressLine;
 
@@ -33,8 +32,8 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View v) {
-            dataSet.add(getItemCount() - 2, new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Через"));
-            notifyItemInserted(getItemCount() - 3);
+            dataSet.add(getItemCount() - 1, new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Куди"));
+            notifyItemInserted(getItemCount() - 2);
         }
     }
 
@@ -131,7 +130,7 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public void deleteAddress(final int position){
         dataSet.remove(position);
-        this.notifyItemRemoved(position);
+        notifyItemRemoved(position);
     }
 }
 

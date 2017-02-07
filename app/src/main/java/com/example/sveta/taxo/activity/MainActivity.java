@@ -15,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.crashlytics.android.Crashlytics;
@@ -26,7 +25,11 @@ import com.example.sveta.taxo.utility.SwipeHelper;
 import com.example.sveta.taxo.model.ModelAddressLine;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -56,10 +59,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ImageView targetLocation;
     private Button buttonOrder;
-    private Marker olderMarker;
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
-    private HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers;
+    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
                     .build();
         }
 
@@ -99,11 +103,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
-        /*
-            Реалізація функціоналу визначення геолокації:
-            якщо мапу завантажено, ставиться маркер на місці перебування пристрою
-            і заноситься до рядкя вводу адреси
-         */
         targetLocation = (ImageView) findViewById(R.id.get_my_location);
         targetLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,8 +114,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
-                    getAddress(geoPosition, viewHolder.editText);
-                    deleteOldMarker(marker);
+                    if (viewHolder.getAdapterPosition() == 0) {
+                        getAddress(geoPosition);
+                        deleteOldMarker(marker);
+                    }
                 }
             }
         });
@@ -130,12 +131,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        /*
-            Завантаження мапи
-         */
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -155,13 +150,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapReady = true;
         this.googleMap = googleMap;
         markerOptions = new MarkerOptions();
-        this.googleMap.getUiSettings().setZoomControlsEnabled(true);
 
         this.googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                 Marker marker = googleMap.addMarker(markerOptions.position(latLng));
-                getAddress(latLng, viewHolder.editText);
+                getAddress(latLng);
                 deleteOldMarker(marker);
             }
         });
@@ -190,8 +184,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    // Парсинг геолокації в адресу
-    private void getAddress(LatLng latLng, EditText editText) {
+    private void getAddress(LatLng latLng) {
         Geocoder geocoder = new Geocoder(MainActivity.this);
         List<Address> addresses = null;
         try {
@@ -199,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (IOException e) {}
         String city = addresses.get(0).getAddressLine(1);
         String street = addresses.get(0).getAddressLine(0);
-        editText.setText(city + ", " + street);
+        viewHolder.editText.setText(city + ", " + street);
     }
 
     public void deleteOldMarker(Marker marker) {

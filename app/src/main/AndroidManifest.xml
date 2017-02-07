@@ -3,6 +3,7 @@
     package="com.example.sveta.taxo">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -27,5 +28,5 @@
             android:name="io.fabric.ApiKey"
             android:value="55296a1f5c3ae39b9cce1beac957d630be66c304" />
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
+
 </manifest>

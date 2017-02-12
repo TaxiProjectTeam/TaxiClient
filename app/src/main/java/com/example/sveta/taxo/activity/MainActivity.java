@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
-                    if (viewHolder.getAdapterPosition() == 0) {
+                    if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
                         getAddress(geoPosition);
                         deleteOldMarker(marker);
                     }

@@ -104,7 +104,7 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     textView.setText(object.text);
                     break;
                 case ModelAddressLine.EDIT_TYPE:
-                    final EditText editText = ((EditTypeViewHolder) holder).editText;
+                    EditText editText = ((EditTypeViewHolder) holder).editText;
                     editText.setHint(object.text);
                     editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                         @Override

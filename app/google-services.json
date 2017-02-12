@@ -15,10 +15,62 @@
       },
       "oauth_client": [
         {
+          "client_id": "346163623434-adq2vsr757t3gv0ljifc6j6js89qke9l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sveta.taxo",
+            "certificate_hash": "832CD908A224E1211771BFD549D39B23949DCBDE"
+          }
+        },
+        {
           "client_id": "346163623434-69426m7vgqii86k3e11k1lv60bu5op93.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.sveta.taxo",
+            "certificate_hash": "82C226E4110401BE7C5BD9D32DFE50ECE0785335"
+          }
+        },
+        {
+          "client_id": "346163623434-s99gp2o74agcku8q5f1u2opjudlgkf7n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVbr9fIspoztocLmdm-OcOngdqCX1X4kY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346163623434-s99gp2o74agcku8q5f1u2opjudlgkf7n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346163623434:android:15c9992d2db579a8",
+        "android_client_info": {
+          "package_name": "com.example.sveta.taxodriver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346163623434-00tpqhi1ft9en6hubis1ramu3k66jdud.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sveta.taxodriver",
             "certificate_hash": "82C226E4110401BE7C5BD9D32DFE50ECE0785335"
           }
         },

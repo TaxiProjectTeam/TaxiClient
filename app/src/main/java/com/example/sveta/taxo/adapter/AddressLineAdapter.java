@@ -1,14 +1,25 @@
 package com.example.sveta.taxo.adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.sveta.taxo.AutoCompleteAdapter;
+import com.example.sveta.taxo.AutoCompletePlace;
 import com.example.sveta.taxo.R;
 import com.example.sveta.taxo.model.ModelAddressLine;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
 
 import java.util.ArrayList;
 
@@ -18,7 +29,10 @@ import java.util.ArrayList;
 
 public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<ModelAddressLine> dataSet;
+    private Context context;
+    private AutoCompleteAdapter googleAdapter;
     private OnFocusItemListener onFocusItemListener;
+    private GoogleApiClient googleApiClient;
 
     public class TextTypeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView textView;
@@ -37,16 +51,20 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public class EditTypeViewHolder extends RecyclerView.ViewHolder implements View.OnFocusChangeListener{
-        public EditText editText;
+    public class EditTypeViewHolder extends RecyclerView.ViewHolder implements View.OnFocusChangeListener, AdapterView.OnItemClickListener{
+        public AutoCompleteTextView editText;
         public OnFocusItemListener listener;
 
         public EditTypeViewHolder(View itemView, OnFocusItemListener onFocusItemListener) {
             super(itemView);
 
             this.listener = onFocusItemListener;
-            this.editText = (EditText) itemView.findViewById(R.id.type_edit);
+            this.editText = (AutoCompleteTextView) itemView.findViewById(R.id.type_edit);
+
+            googleAdapter = new AutoCompleteAdapter(context);
+            editText.setAdapter(googleAdapter);
             editText.setOnFocusChangeListener(this);
+            editText.setOnItemClickListener(this);
         }
 
         @Override
@@ -54,10 +72,19 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             if (listener != null)
                 listener.onItemFocus(getAdapterPosition());
         }
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            AutoCompletePlace place = (AutoCompletePlace) parent.getItemAtPosition( position );
+            findPlaceById(place.getId());
+        }
     }
 
-    public AddressLineAdapter(ArrayList<ModelAddressLine> data) {
+    public AddressLineAdapter(ArrayList<ModelAddressLine> data, GoogleApiClient googleApiClient, AutoCompleteAdapter adapter, Context context) {
         this.dataSet = data;
+        this.googleAdapter = adapter;
+        this.context = context;
+        this.googleApiClient = googleApiClient;
     }
 
     @Override
@@ -104,7 +131,7 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     textView.setText(object.text);
                     break;
                 case ModelAddressLine.EDIT_TYPE:
-                    EditText editText = ((EditTypeViewHolder) holder).editText;
+                    AutoCompleteTextView editText = ((EditTypeViewHolder) holder).editText;
                     editText.setHint(object.text);
                     editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                         @Override
@@ -131,6 +158,26 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void deleteAddress(final int position){
         dataSet.remove(position);
         notifyItemRemoved(position);
+    }
+
+    private void findPlaceById(String id) {
+        if( TextUtils.isEmpty( id ) || googleApiClient == null || !googleApiClient.isConnected() )
+            return;
+
+        Places.GeoDataApi.getPlaceById(googleApiClient, id).setResultCallback(new ResultCallback<PlaceBuffer>() {
+            @Override
+            public void onResult(PlaceBuffer places) {
+                if( places.getStatus().isSuccess() ) {
+                    Place place = places.get( 0 );
+                    displayPlace(place);
+                    mPredictTextView.setText( "" );
+                    mAdapter.clear();
+                }
+
+                //Release the PlaceBuffer to prevent a memory leak
+                places.release();
+            }
+        } );
     }
 }
 

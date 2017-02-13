@@ -14,10 +14,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import com.crashlytics.android.Crashlytics;
+import com.example.sveta.taxo.AutoCompleteAdapter;
 import com.example.sveta.taxo.adapter.AddressLineAdapter;
 import com.example.sveta.taxo.adapter.OnFocusItemListener;
 import com.example.sveta.taxo.R;
@@ -26,6 +28,7 @@ import com.example.sveta.taxo.model.ModelAddressLine;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button buttonOrder;
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
+    private AutoCompleteAdapter googleAdapter;
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers;
 
     @Override
@@ -70,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
                     .build();
         }
 
@@ -80,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Куди"));
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.TEXT_TYPE, "Додати точку маршруту"));
 
-        final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines);
+        final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines, googleAdapter, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view_address);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -127,18 +133,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        googleApiClient.connect();
+        if(googleApiClient != null)
+            googleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
-        googleApiClient.disconnect();
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            googleAdapter.setGoogleApiClient(null);
+            googleApiClient.disconnect();
+        }
         super.onStop();
     }
 
@@ -164,6 +173,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_FINE_LOCATION);
         }
         lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+
+        if(googleAdapter != null)
+            googleAdapter.setGoogleApiClient(googleApiClient);
     }
 
     @Override

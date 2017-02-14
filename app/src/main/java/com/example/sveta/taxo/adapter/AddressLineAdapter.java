@@ -1,14 +1,15 @@
 package com.example.sveta.taxo.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.sveta.taxo.AutoCompleteAdapter;
@@ -161,17 +162,16 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     private void findPlaceById(String id) {
-        if( TextUtils.isEmpty( id ) || googleApiClient == null || !googleApiClient.isConnected() )
+        if (TextUtils.isEmpty(id) || googleApiClient == null || !googleApiClient.isConnected())
             return;
 
         Places.GeoDataApi.getPlaceById(googleApiClient, id).setResultCallback(new ResultCallback<PlaceBuffer>() {
             @Override
-            public void onResult(PlaceBuffer places) {
-                if( places.getStatus().isSuccess() ) {
-                    Place place = places.get( 0 );
-                    displayPlace(place);
-                    mPredictTextView.setText( "" );
-                    mAdapter.clear();
+            public void onResult(@NonNull PlaceBuffer places) {
+                if(places.getStatus().isSuccess()) {
+                    Place place = places.get(0);
+                    Log.d("TAG", place.getAddress().toString());
+                    googleAdapter.clear();
                 }
 
                 //Release the PlaceBuffer to prevent a memory leak

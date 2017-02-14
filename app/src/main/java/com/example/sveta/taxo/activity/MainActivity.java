@@ -14,7 +14,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -61,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
     private AutoCompleteAdapter googleAdapter;
+    private AddressLineAdapter adapter;
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers;
 
     @Override
@@ -86,7 +86,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Куди"));
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.TEXT_TYPE, "Додати точку маршруту"));
 
-        final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines, googleAdapter, this);
+        googleAdapter = new AutoCompleteAdapter(this);
+        adapter = new AddressLineAdapter(modelAddressLines, googleApiClient, googleAdapter, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view_address);
         recyclerView.setLayoutManager(linearLayoutManager);

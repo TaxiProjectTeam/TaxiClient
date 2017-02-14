@@ -8,7 +8,7 @@ public class AutoCompletePlace {
     private String id;
     private String description;
 
-    public AutoCompletePlace( String id, String description ) {
+    public AutoCompletePlace(String id, String description) {
         this.id = id;
         this.description = description;
     }
@@ -17,7 +17,7 @@ public class AutoCompletePlace {
         return description;
     }
 
-    public void setDescription( String description ) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -25,7 +25,7 @@ public class AutoCompletePlace {
         return id;
     }
 
-    public void setId( String id ) {
+    public void setId(String id) {
         this.id = id;
     }
 }

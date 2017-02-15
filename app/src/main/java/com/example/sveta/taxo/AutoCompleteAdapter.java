@@ -17,8 +17,6 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.concurrent.TimeUnit;
 
@@ -88,13 +86,10 @@ public class AutoCompleteAdapter extends ArrayAdapter<AutoCompletePlace> impleme
 
     private void displayPredictiveResults(String query)
     {
-        //Southwest corner to Northeast corner.
-        LatLngBounds bounds = new LatLngBounds(new LatLng(39.906374, -105.122337), new LatLng(39.949552, -105.068779));
-
         Places.GeoDataApi.getAutocompletePredictions(
                 googleApiClient,
                 query,
-                bounds,
+                null,
                 new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS).build())
                 .setResultCallback (new ResultCallback<AutocompletePredictionBuffer>() {
                             @Override
@@ -104,12 +99,10 @@ public class AutoCompleteAdapter extends ArrayAdapter<AutoCompletePlace> impleme
 
                                 if (buffer.getStatus().isSuccess()) {
                                     for (AutocompletePrediction prediction : buffer) {
-                                        //Add as a new item to avoid IllegalArgumentsException when buffer is released
                                         add (new AutoCompletePlace(prediction.getPlaceId(), prediction.toString()));
                                     }
                                 }
 
-                                //Prevent memory leak by releasing buffer
                                 buffer.release();
                             }
                         }, 60, TimeUnit.SECONDS);

@@ -15,14 +15,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.example.sveta.taxo.R;
 import com.example.sveta.taxo.adapter.AddressLineAdapter;
 import com.example.sveta.taxo.adapter.OnFocusItemListener;
-import com.example.sveta.taxo.R;
-import com.example.sveta.taxo.utility.SwipeHelper;
 import com.example.sveta.taxo.model.ModelAddressLine;
+import com.example.sveta.taxo.model.Order;
+import com.example.sveta.taxo.utility.SwipeHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -34,6 +37,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static final String ORDERS_CHILD = "orders";
     private static final int MY_PERMISSION_REQUEST_FINE_LOCATION = 13;
+
     private GoogleMap googleMap;
     private GoogleApiClient googleApiClient;
     private Location lastLocation;
@@ -53,11 +59,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MarkerOptions markerOptions;
     private boolean mapReady = false;
 
+    private DatabaseReference databaseReference;
+
     private ImageView targetLocation;
     private Button buttonOrder;
+    private Button buttonPlus;
+    private TextView total;
+    private EditText additionalComment;
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
-    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers;
+    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
+    private HashMap<String, Double> startPosition = new HashMap<>();
+    private HashMap<String, HashMap<String, Double>> destinationPositions = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,12 +86,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .build();
         }
 
-        markers = new HashMap<>();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         modelAddressLines = new ArrayList<>();
-        modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Звідки"));
-        modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Куди"));
-        modelAddressLines.add(new ModelAddressLine(ModelAddressLine.TEXT_TYPE, "Додати точку маршруту"));
+        modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.start_address)));
+        modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.destination_address)));
+        modelAddressLines.add(new ModelAddressLine(ModelAddressLine.TEXT_TYPE, getString(R.string.add_address)));
 
         final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -103,16 +116,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 if (mapReady) {
                     geoPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    Marker marker = googleMap.addMarker(markerOptions.position(geoPosition).title("Ви знаходитесь тут"));
+                    Marker marker = googleMap.addMarker(markerOptions.position(geoPosition).title(getString(R.string.your_location)));
 
                     CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
                     if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
                         getAddress(geoPosition);
+                        addAddressesToMap(geoPosition);
                         deleteOldMarker(marker);
                     }
                 }
+            }
+        });
+
+        total = (TextView) findViewById(R.id.total);
+        total.setText("0");
+
+        additionalComment = (EditText) findViewById(R.id.additionalComment);
+        additionalComment.setText("");
+
+        buttonPlus = (Button) findViewById(R.id.button_plus);
+        buttonPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
             }
         });
 
@@ -120,6 +147,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         buttonOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Order order = new Order(
+                        startPosition,
+                        destinationPositions,
+                        Integer.parseInt(total.getText().toString()),
+                        additionalComment.getText().toString());
+                databaseReference.child(ORDERS_CHILD).push().setValue(order);
                 Intent intent = new Intent(getApplicationContext(), DetailOrderActivity.class);
                 startActivity(intent);
             }
@@ -153,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapClick(LatLng latLng) {
                 Marker marker = googleMap.addMarker(markerOptions.position(latLng));
                 getAddress(latLng);
+                addAddressesToMap(latLng);
                 deleteOldMarker(marker);
             }
         });
@@ -190,6 +224,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         String city = addresses.get(0).getAddressLine(1);
         String street = addresses.get(0).getAddressLine(0);
         viewHolder.editText.setText(city + ", " + street);
+    }
+
+    private void addAddressesToMap(LatLng latLng) {
+        if (viewHolder.getAdapterPosition() == 0) {
+            startPosition.put(getString(R.string.latitude), latLng.latitude);
+            startPosition.put(getString(R.string.longitude), latLng.longitude);
+        } else {
+            HashMap<String, Double> destinationPositionCoords = new HashMap<>();
+            destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
+            destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
+            destinationPositions.put(viewHolder.getAdapterPosition() + "", destinationPositionCoords);
+        }
     }
 
     public void deleteOldMarker(Marker marker) {

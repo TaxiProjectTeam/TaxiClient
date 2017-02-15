@@ -17,4 +17,7 @@
     <string name="car_number">Державний номер:</string>
     <string name="add_address">Додати точку маршруту</string>
     <string name="title_activity_maps">Map</string>
+    <string name="latitude">latitude</string>
+    <string name="longitude">longitude</string>
+    <string name="your_location">Ви знаходитесь тут</string>
 </resources>

@@ -2,66 +2,70 @@ package com.example.sveta.taxo.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.HashMap;
+
 /**
  * Created by Sveta on 03.01.2017.
  */
 @IgnoreExtraProperties
 public class Order {
 
-    private String startingStreet;
-    private String startingHouse;
-    private String startingEntrance;
-    private String destinationStreet;
-    private String destinationHouse;
+    private HashMap<String, Double> fromCoords;
+    private HashMap<String, Double> driverPos;
+    private String driverId;
+    private String status;
+    private int time;
+    private HashMap<String, HashMap<String, Double>> toCoords;
+    private int price;
+    private String additionalComment;
 
     public Order() {
     }
 
-    public Order(String startingStreet, String startingHouse, String startingEntrance, String destinationStreet, String destinationHouse) {
-        this.startingStreet = startingStreet;
-        this.startingHouse = startingHouse;
-        this.startingEntrance = startingEntrance;
-        this.destinationStreet = destinationStreet;
-        this.destinationHouse = destinationHouse;
+    public Order(HashMap<String, Double> fromCoords, HashMap<String, HashMap<String, Double>> toCoords, int price, String additionalComment) {
+        this.fromCoords = fromCoords;
+        this.toCoords = toCoords;
+        this.price = price;
+        this.additionalComment = additionalComment;
+
+        this.driverPos = new HashMap<>();
+        this.driverPos.put("latitude", 0.0);
+        this.driverPos.put("longitude", 0.0);
+
+        this.driverId = "";
+        this.time = 0;
+        this.status = "";
     }
 
-    public String getStartingStreet() {
-        return startingStreet;
+    public HashMap<String, Double> getFromCoords() {
+        return fromCoords;
     }
 
-    public String getStartingHouse() {
-        return startingHouse;
+    public HashMap<String, HashMap<String, Double>> getToCoords() {
+        return toCoords;
     }
 
-    public String getStartingEntrance() {
-        return startingEntrance;
+    public int getPrice() {
+        return price;
     }
 
-    public String getDestinationStreet() {
-        return destinationStreet;
+    public String getAdditionalComment() {
+        return additionalComment;
     }
 
-    public String getDestinationHouse() {
-        return destinationHouse;
+    public HashMap<String, Double> getDriverPos() {
+        return driverPos;
     }
 
-    public void setStartingStreet(String startingStreet) {
-        this.startingStreet = startingStreet;
+    public String getDriverId() {
+        return driverId;
     }
 
-    public void setStartingHouse(String startingHouse) {
-        this.startingHouse = startingHouse;
+    public String getStatus() {
+        return status;
     }
 
-    public void setStartingEntrance(String startingEntrance) {
-        this.startingEntrance = startingEntrance;
-    }
-
-    public void setDestinationStreet(String destinationStreet) {
-        this.destinationStreet = destinationStreet;
-    }
-
-    public void setDestinationHouse(String destinationHouse) {
-        this.destinationHouse = destinationHouse;
+    public int getTime() {
+        return time;
     }
 }

@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "346163623434-6hm8l1v3kg4b57e1dge0ahkdu5c0ujj3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sveta.taxo",
+            "certificate_hash": "54F1E587BD6B31F81643A907A9D8077732D4B05E"
+          }
+        },
+        {
+          "client_id": "346163623434-gfvc0s17gde6pccu7v64drkhhngh2fei.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sveta.taxo",
+            "certificate_hash": "B1A9702194B8A0DC2BBE5512E54B6D3EE44DBB51"
+          }
+        },
+        {
           "client_id": "346163623434-adq2vsr757t3gv0ljifc6j6js89qke9l.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -66,6 +82,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "346163623434-822lqupqrh427ihk75ig8kv402di1j2i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sveta.taxodriver",
+            "certificate_hash": "832CD908A224E1211771BFD549D39B23949DCBDE"
+          }
+        },
         {
           "client_id": "346163623434-00tpqhi1ft9en6hubis1ramu3k66jdud.apps.googleusercontent.com",
           "client_type": 1,

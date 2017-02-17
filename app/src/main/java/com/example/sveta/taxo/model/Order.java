@@ -34,7 +34,7 @@ public class Order {
 
         this.driverId = "";
         this.time = 0;
-        this.status = "";
+        this.status = "free";
     }
 
     public HashMap<String, Double> getFromCoords() {

@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
-            destinationPositions.put(viewHolder.getAdapterPosition() + "", destinationPositionCoords);
+            destinationPositions.put(viewHolder.getAdapterPosition() - 1 + "", destinationPositionCoords); //I need indexing 0 :) (If you can, find a proper way to fix it)
         }
     }
 

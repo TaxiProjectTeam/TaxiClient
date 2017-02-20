@@ -2,12 +2,24 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cameraZoom="13"
+        app:cameraTargetLat="49.441153"
+        app:cameraTargetLng="32.064271"
+        />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/order_status"
+        android:text="@string/waiting_for_accept_order"
         style="@style/text_style"
         android:textAppearance="?android:textAppearanceLarge"
         android:paddingBottom="@dimen/activity_vertical_margin"
@@ -15,17 +27,6 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="@dimen/activity_vertical_margin" />
-
-    <Chronometer
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/text_style"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:id="@+id/timer"
-        android:layout_below="@+id/order_status"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="91dp"
-        android:layout_alignParentEnd="true" />
 
     <TextView
         android:layout_width="match_parent"
@@ -65,6 +66,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="0 грн"
+                android:id="@+id/price_total"
                 style="@style/text_style"
                 />
         </LinearLayout>
@@ -85,6 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="Василь"
+                android:id="@+id/driver_name"
                 style="@style/text_style"/>
         </LinearLayout>
 
@@ -104,6 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="093-909-43-36"
+                android:id="@+id/driver_phone_number"
                 style="@style/text_style"/>
         </LinearLayout>
 
@@ -123,6 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="Ford"
+                android:id="@+id/car_model"
                 style="@style/text_style"/>
         </LinearLayout>
 
@@ -161,6 +166,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="СА 2345 СВ"
+                android:id="@+id/car_number"
                 style="@style/text_style"/>
         </LinearLayout>
     </LinearLayout>

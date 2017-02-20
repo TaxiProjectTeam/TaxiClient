@@ -49,7 +49,7 @@ import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    public static final String ORDERS_CHILD = "orders";
+    public static final String ORDER_CHILD = "orders";
     private static final int MY_PERMISSION_REQUEST_FINE_LOCATION = 13;
 
     private GoogleMap googleMap;
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
                         getAddress(geoPosition);
-                        addAddressesToMap(geoPosition);
+                        addAddressesToHashMap(geoPosition);
                         deleteOldMarker(marker);
                     }
                 }
@@ -152,8 +152,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         destinationPositions,
                         Integer.parseInt(total.getText().toString()),
                         additionalComment.getText().toString());
-                databaseReference.child(ORDERS_CHILD).push().setValue(order);
+                databaseReference = databaseReference.child(ORDER_CHILD).push();
+                String orderKey = databaseReference.getKey();
+                databaseReference.setValue(order);
                 Intent intent = new Intent(getApplicationContext(), DetailOrderActivity.class);
+                intent.putExtra("orderKey", orderKey);
                 startActivity(intent);
             }
         });
@@ -186,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapClick(LatLng latLng) {
                 Marker marker = googleMap.addMarker(markerOptions.position(latLng));
                 getAddress(latLng);
-                addAddressesToMap(latLng);
+                addAddressesToHashMap(latLng);
                 deleteOldMarker(marker);
             }
         });
@@ -226,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         viewHolder.editText.setText(city + ", " + street);
     }
 
-    private void addAddressesToMap(LatLng latLng) {
+    private void addAddressesToHashMap(LatLng latLng) {
         if (viewHolder.getAdapterPosition() == 0) {
             startPosition.put(getString(R.string.latitude), latLng.latitude);
             startPosition.put(getString(R.string.longitude), latLng.longitude);
@@ -234,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
-            destinationPositions.put(viewHolder.getAdapterPosition() - 1 + "", destinationPositionCoords); //I need indexing 0 :) (If you can, find a proper way to fix it)
+            destinationPositions.put(viewHolder.getAdapterPosition() - 1 + "", destinationPositionCoords);
         }
     }
 

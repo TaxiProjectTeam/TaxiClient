@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>price_per_kilometres</key>
+        <value>5</value>
+    </entry>
+    <entry>
+        <key>starting_price</key>
+        <value>20</value>
+    </entry>
+</defaultsMap>

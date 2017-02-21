@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.example.sveta.taxo.R;
@@ -37,8 +38,11 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,7 +53,9 @@ import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    public static final String ORDER_CHILD = "orders";
+    private static final String ORDER_CHILD = "orders";
+    private static final String PRICE_PER_KILOMETRES_KEY = "price_per_kilometres";
+    private static final String STARTING_PRICE_KEY = "starting_price";
     private static final int MY_PERMISSION_REQUEST_FINE_LOCATION = 13;
 
     private GoogleMap googleMap;
@@ -60,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mapReady = false;
 
     private DatabaseReference databaseReference;
+    private FirebaseRemoteConfig firebaseRemoteConfig;
 
     private ImageView targetLocation;
     private Button buttonOrder;
@@ -87,6 +94,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        firebaseRemoteConfig.setDefaults(R.xml.remote_object);
+        firebaseRemoteConfig.fetch().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful())
+                    firebaseRemoteConfig.activateFetched();
+            }
+        });
 
         modelAddressLines = new ArrayList<>();
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.start_address)));
@@ -131,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         total = (TextView) findViewById(R.id.total);
-        total.setText("0");
+        total.setText(getOrderTotal());
 
         additionalComment = (EditText) findViewById(R.id.additionalComment);
         additionalComment.setText("");
@@ -147,17 +164,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         buttonOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Order order = new Order(
-                        startPosition,
-                        destinationPositions,
-                        Integer.parseInt(total.getText().toString()),
-                        additionalComment.getText().toString());
-                databaseReference = databaseReference.child(ORDER_CHILD).push();
-                String orderKey = databaseReference.getKey();
-                databaseReference.setValue(order);
-                Intent intent = new Intent(getApplicationContext(), DetailOrderActivity.class);
-                intent.putExtra("orderKey", orderKey);
-                startActivity(intent);
+                boolean isEmpty = false;
+                for (int i = 0; i < adapter.getItemCount() - 1; i++) {
+                    AddressLineAdapter.EditTypeViewHolder holder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    if (holder.editText == null || (holder.editText.getText().toString()).equals(""))
+                        isEmpty = true;
+                }
+                if (!isEmpty) {
+                    Order order = new Order(
+                            startPosition,
+                            destinationPositions,
+                            Integer.parseInt(total.getText().toString()),
+                            additionalComment.getText().toString());
+                    databaseReference = databaseReference.child(ORDER_CHILD).push();
+                    String orderKey = databaseReference.getKey();
+                    databaseReference.setValue(order);
+                    Intent intent = new Intent(getApplicationContext(), DetailOrderActivity.class);
+                    intent.putExtra("orderKey", orderKey);
+                    startActivity(intent);
+                }
+                else
+                    Toast.makeText(MainActivity.this, "Ви ввели не всі поля з адресами", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -248,5 +275,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             markers.get(viewHolder).remove();
             markers.put(viewHolder, marker);
         }
+    }
+
+    private String getOrderTotal() {
+        String pricePerKilometres = firebaseRemoteConfig.getString(PRICE_PER_KILOMETRES_KEY);
+        String startingPrice = firebaseRemoteConfig.getString(STARTING_PRICE_KEY);
+        int totalPrice = Integer.parseInt(pricePerKilometres) + Integer.parseInt(startingPrice);
+        return totalPrice + "";
     }
 }

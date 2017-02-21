@@ -16,8 +16,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class DetailOrderActivity extends AppCompatActivity implements OnMapReadyCallback {
-    public static final String DRIVER_CHILD = "drivers";
-    public static final String ORDER_CHILD = "orders";
+    private static final String DRIVER_CHILD = "drivers";
+    private static final String ORDER_CHILD = "orders";
+    private static final int STATUS_WAITING = 11;
+    private static final int STATUS_READY = 12;
     private DatabaseReference databaseReference;
     private TextView driverName;
     private TextView driverPhoneNumber;
@@ -55,7 +57,7 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                             driverPhoneNumber.setText(driver.getPhoneNumber());
                             carModel.setText(driver.getCarModel());
                             carNumber.setText(driver.getCarNumber());
-                            changeOrderStatus();
+                            changeOrderStatus(STATUS_WAITING);
                         }
 
                         @Override
@@ -75,8 +77,15 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
         mapFragment.getMapAsync(this);
     }
 
-    private void changeOrderStatus() {
-        orderStatus.setText(R.string.waiting_for_car);
+    private void changeOrderStatus(int status) {
+        switch (status) {
+            case (STATUS_WAITING):
+                orderStatus.setText(R.string.waiting_for_car);
+                break;
+            case (STATUS_READY):
+                orderStatus.setText(R.string.car_ready);
+                break;
+        }
     }
 
     @Override

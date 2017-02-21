@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button buttonPlus;
     private TextView total;
     private EditText additionalComment;
+
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
@@ -93,15 +94,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .build();
         }
 
+        total = (TextView) findViewById(R.id.total);
+
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
         firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        firebaseRemoteConfig.setDefaults(R.xml.remote_object);
-        firebaseRemoteConfig.fetch().addOnCompleteListener(new OnCompleteListener<Void>() {
+        firebaseRemoteConfig.setDefaults(R.xml.default_remote_parametrs);
+        firebaseRemoteConfig.fetch(1).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful())
                     firebaseRemoteConfig.activateFetched();
+                displayTotalPrice();
             }
         });
 
@@ -146,9 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
-
-        total = (TextView) findViewById(R.id.total);
-        total.setText(getOrderTotal());
 
         additionalComment = (EditText) findViewById(R.id.additionalComment);
         additionalComment.setText("");
@@ -277,10 +278,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private String getOrderTotal() {
+    private void displayTotalPrice() {
         String pricePerKilometres = firebaseRemoteConfig.getString(PRICE_PER_KILOMETRES_KEY);
         String startingPrice = firebaseRemoteConfig.getString(STARTING_PRICE_KEY);
         int totalPrice = Integer.parseInt(pricePerKilometres) + Integer.parseInt(startingPrice);
-        return totalPrice + "";
+        String result = totalPrice + "";
+        total.setText(result);
     }
 }

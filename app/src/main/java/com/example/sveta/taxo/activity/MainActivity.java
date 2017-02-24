@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.example.sveta.taxo.R;
+import com.example.sveta.taxo.adapter.AddressArrayAdapter;
 import com.example.sveta.taxo.adapter.AddressLineAdapter;
 import com.example.sveta.taxo.adapter.OnFocusItemListener;
 import com.example.sveta.taxo.model.ModelAddressLine;
@@ -30,12 +31,15 @@ import com.example.sveta.taxo.utility.SwipeHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -74,11 +78,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView total;
     private EditText additionalComment;
 
+    private AutocompleteFilter autocompleteFilter;
+    private static final LatLngBounds CHERCASSY = new LatLngBounds(
+            new LatLng(49.364583, 31.9578749), new LatLng(49.49797, 32.140585));
+    private AddressArrayAdapter addressArrayAdapter;
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
     private HashMap<String, Double> startPosition = new HashMap<>();
     private HashMap<String, HashMap<String, Double>> destinationPositions = new HashMap<>();
+    private int totalPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .addApi(Places.GEO_DATA_API)
                     .build();
         }
 
@@ -114,16 +124,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.destination_address)));
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.TEXT_TYPE, getString(R.string.add_address)));
 
-        final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines);
+        final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view_address);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
 
+        autocompleteFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
+                .build();
+        addressArrayAdapter = new AddressArrayAdapter(this, android.R.layout.simple_list_item_1, CHERCASSY, autocompleteFilter);
+
         adapter.setOnFocusItemListener(new OnFocusItemListener() {
             @Override
             public void onItemFocus(int position) {
                 viewHolder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+                viewHolder.editText.setThreshold(3);
+                viewHolder.editText.setAdapter(addressArrayAdapter);
+                // TODO: fixed this
+//                LatLng latLng = new LatLng(getLocationFromAddress(viewHolder.editText.getText().toString()).getLatitude(), getLocationFromAddress(viewHolder.editText.getText().toString()).getLongitude());
+//                addAddressesToHashMap(latLng);
             }
         });
 
@@ -143,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
                     if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
-                        getAddress(geoPosition);
+                        getAddressFromLocation(geoPosition);
                         addAddressesToHashMap(geoPosition);
                         deleteOldMarker(marker);
                     }
@@ -158,6 +178,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         buttonPlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                totalPrice += 5;
+                String result = totalPrice + "";
+                total.setText(result);
             }
         });
 
@@ -216,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 Marker marker = googleMap.addMarker(markerOptions.position(latLng));
-                getAddress(latLng);
+                getAddressFromLocation(latLng);
                 addAddressesToHashMap(latLng);
                 deleteOldMarker(marker);
             }
@@ -229,11 +252,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_FINE_LOCATION);
         }
         lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        addressArrayAdapter.setGoogleApiClient(googleApiClient);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        addressArrayAdapter.setGoogleApiClient(null);
     }
 
     @Override
@@ -246,16 +270,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void getAddress(LatLng latLng) {
+    private void getAddressFromLocation(LatLng latLng) {
         Geocoder geocoder = new Geocoder(MainActivity.this);
         List<Address> addresses = null;
         try {
             addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
         } catch (IOException e) {}
-        String city = addresses.get(0).getAddressLine(1);
-        String street = addresses.get(0).getAddressLine(0);
-        viewHolder.editText.setText(city + ", " + street);
+        String address = addresses.get(0).getAddressLine(0);
+        viewHolder.editText.setText(address);
     }
+
+//    private Address getLocationFromAddress(String address) {
+//        Geocoder geocoder = new Geocoder(MainActivity.this);
+//        try {
+//            List<Address> location = geocoder.getFromLocationName(address, 5);
+//            return location.get(0);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     private void addAddressesToHashMap(LatLng latLng) {
         if (viewHolder.getAdapterPosition() == 0) {
@@ -281,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void displayTotalPrice() {
         String pricePerKilometres = firebaseRemoteConfig.getString(PRICE_PER_KILOMETRES_KEY);
         String startingPrice = firebaseRemoteConfig.getString(STARTING_PRICE_KEY);
-        int totalPrice = Integer.parseInt(pricePerKilometres) + Integer.parseInt(startingPrice);
+        totalPrice = Integer.parseInt(pricePerKilometres) + Integer.parseInt(startingPrice);
         String result = totalPrice + "";
         total.setText(result);
     }

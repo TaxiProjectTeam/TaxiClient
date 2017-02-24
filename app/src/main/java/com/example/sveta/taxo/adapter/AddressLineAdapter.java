@@ -1,14 +1,20 @@
 package com.example.sveta.taxo.adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.sveta.taxo.R;
 import com.example.sveta.taxo.model.ModelAddressLine;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
 
@@ -18,6 +24,7 @@ import java.util.ArrayList;
 
 public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private ArrayList<ModelAddressLine> dataSet;
+    private Context context;
     private OnFocusItemListener onFocusItemListener;
 
     public class TextTypeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -37,15 +44,15 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public class EditTypeViewHolder extends RecyclerView.ViewHolder implements View.OnFocusChangeListener{
-        public EditText editText;
+    public class EditTypeViewHolder extends RecyclerView.ViewHolder implements View.OnFocusChangeListener {
+        public AutoCompleteTextView editText;
         public OnFocusItemListener listener;
 
         public EditTypeViewHolder(View itemView, OnFocusItemListener onFocusItemListener) {
             super(itemView);
 
             this.listener = onFocusItemListener;
-            this.editText = (EditText) itemView.findViewById(R.id.type_edit);
+            this.editText = (AutoCompleteTextView) itemView.findViewById(R.id.type_edit);
             editText.setOnFocusChangeListener(this);
         }
 
@@ -56,8 +63,9 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public AddressLineAdapter(ArrayList<ModelAddressLine> data) {
+    public AddressLineAdapter(ArrayList<ModelAddressLine> data, Context context) {
         this.dataSet = data;
+        this.context = context;
     }
 
     @Override
@@ -104,7 +112,7 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     textView.setText(object.text);
                     break;
                 case ModelAddressLine.EDIT_TYPE:
-                    EditText editText = ((EditTypeViewHolder) holder).editText;
+                    AutoCompleteTextView editText = ((EditTypeViewHolder) holder).editText;
                     editText.setHint(object.text);
                     editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                         @Override

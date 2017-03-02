@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        additionalComment = (EditText) findViewById(R.id.additionalComment);
+        additionalComment = (EditText) findViewById(R.id.additional_comment);
         additionalComment.setText("");
 
         buttonPlus = (Button) findViewById(R.id.button_plus);

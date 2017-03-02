@@ -88,7 +88,7 @@
                 style="@style/text_style"
                 android:gravity="start"
                 android:layout_alignParentLeft="true"
-                android:id="@+id/additionalComment"/>
+                android:id="@+id/additional_comment"/>
 
             <Button
                 android:layout_width="150dp"

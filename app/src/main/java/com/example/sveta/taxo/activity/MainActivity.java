@@ -3,6 +3,7 @@ package com.example.sveta.taxo.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -21,12 +22,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.example.sveta.taxo.ApiInterface;
 import com.example.sveta.taxo.R;
+import com.example.sveta.taxo.RouteApiClient;
 import com.example.sveta.taxo.adapter.AddressArrayAdapter;
 import com.example.sveta.taxo.adapter.AddressLineAdapter;
 import com.example.sveta.taxo.adapter.OnFocusItemListener;
 import com.example.sveta.taxo.model.ModelAddressLine;
 import com.example.sveta.taxo.model.Order;
+import com.example.sveta.taxo.model.RouteResponse;
 import com.example.sveta.taxo.utility.SwipeHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,11 +46,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.maps.android.PolyUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,8 +60,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String ORDER_CHILD = "orders";
     private static final String PRICE_PER_KILOMETRES_KEY = "price_per_kilometres";
@@ -68,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng geoPosition;
     private MarkerOptions markerOptions;
     private boolean mapReady = false;
+
+    private ApiInterface routeApiInterface;
+    private Call<RouteResponse> routeModelCall;
+    private PolylineOptions polylineOptions;
 
     private DatabaseReference databaseReference;
     private FirebaseRemoteConfig firebaseRemoteConfig;
@@ -87,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
     private HashMap<String, Double> startPosition = new HashMap<>();
     private HashMap<String, HashMap<String, Double>> destinationPositions = new HashMap<>();
+    private List<LatLng> routePoints = new ArrayList<>();
     private int totalPrice;
 
     @Override
@@ -103,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .addApi(Places.GEO_DATA_API)
                     .build();
         }
+
+        routeApiInterface = RouteApiClient.getClient().create(ApiInterface.class);
+        polylineOptions = new PolylineOptions();
 
         total = (TextView) findViewById(R.id.total);
 
@@ -166,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         getAddressFromLocation(geoPosition);
                         addAddressesToHashMap(geoPosition);
                         deleteOldMarker(marker);
+                        drawRoute();
                     }
                 }
             }
@@ -217,6 +237,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    private void drawRoute() {
+        polylineOptions.width(4);
+        polylineOptions.color(Color.BLUE);
+        getRoute();
+        for(LatLng point : routePoints){
+            polylineOptions.add(point);
+        }
+        googleMap.addPolyline(polylineOptions);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -242,14 +272,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 getAddressFromLocation(latLng);
                 addAddressesToHashMap(latLng);
                 deleteOldMarker(marker);
+                drawRoute();
             }
         });
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_FINE_LOCATION);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_FINE_LOCATION);
         }
         lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         addressArrayAdapter.setGoogleApiClient(googleApiClient);
@@ -319,5 +352,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         totalPrice = Integer.parseInt(pricePerKilometres) + Integer.parseInt(startingPrice);
         String result = totalPrice + "";
         total.setText(result);
+    }
+
+    private void getRoute() {
+        if (!startPosition.isEmpty() || !destinationPositions.isEmpty()) {
+            Double startLat = startPosition.get(getString(R.string.latitude));
+            Double startLng = startPosition.get(getString(R.string.longitude));
+
+            Double destinationLat = destinationPositions.get("0").get(getString(R.string.latitude));
+            Double destinationLng = destinationPositions.get("0").get(getString(R.string.longitude));
+
+            routeModelCall = routeApiInterface.getRoute(startLat + "," + startLng,
+                    destinationLat + "," + destinationLng);
+
+            if (routeModelCall != null) {
+                routeModelCall.enqueue(new Callback<RouteResponse>() {
+                    @Override
+                    public void onResponse(Call<RouteResponse> call, Response<RouteResponse> response) {
+                        RouteResponse routeResponse = response.body();
+                        routePoints = PolyUtil.decode(routeResponse.getPoints());
+                    }
+
+                    @Override
+                    public void onFailure(Call<RouteResponse> call, Throwable t) {
+
+                    }
+                });
+
+            }
+        }
     }
 }

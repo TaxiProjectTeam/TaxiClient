@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -154,17 +155,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
         addressArrayAdapter = new AddressArrayAdapter(this, android.R.layout.simple_list_item_1, CHERCASSY, autocompleteFilter);
 
+
         adapter.setOnFocusItemListener(new OnFocusItemListener() {
             @Override
             public void onItemFocus(int position) {
                 viewHolder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
-                viewHolder.editText.setThreshold(3);
+                viewHolder.editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Toast.makeText(getApplicationContext(), "Click", Toast.LENGTH_LONG).show();
+                    }
+                });
                 viewHolder.editText.setAdapter(addressArrayAdapter);
-                // TODO: fixed this
-//                LatLng latLng = new LatLng(getLocationFromAddress(viewHolder.editText.getText().toString()).getLatitude(), getLocationFromAddress(viewHolder.editText.getText().toString()).getLongitude());
-//                addAddressesToHashMap(latLng);
+                if (!viewHolder.editText.getText().toString().equals("")) {
+                    LatLng latLng = new LatLng(getLocationFromAddress(viewHolder.editText.getText().toString()).getLatitude(),
+                            getLocationFromAddress(viewHolder.editText.getText().toString()).getLongitude());
+                    addAddressesToHashMap(latLng);
+                }
             }
         });
+
 
         ItemTouchHelper.Callback callback = new SwipeHelper(adapter);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
@@ -313,17 +323,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         viewHolder.editText.setText(address);
     }
 
-//    private Address getLocationFromAddress(String address) {
-//        Geocoder geocoder = new Geocoder(MainActivity.this);
-//        try {
-//            List<Address> location = geocoder.getFromLocationName(address, 5);
-//            return location.get(0);
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    private Address getLocationFromAddress(String address) {
+        Geocoder geocoder = new Geocoder(MainActivity.this);
+        try {
+            List<Address> location = geocoder.getFromLocationName(address, 5);
+            return location.get(0);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private void addAddressesToHashMap(LatLng latLng) {
         if (viewHolder.getAdapterPosition() == 0) {
@@ -355,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void getRoute() {
-        if (!startPosition.isEmpty() || !destinationPositions.isEmpty()) {
+        if (startPosition.size() != 0 && destinationPositions.size() != 0) {
             Double startLat = startPosition.get(getString(R.string.latitude));
             Double startLng = startPosition.get(getString(R.string.longitude));
 

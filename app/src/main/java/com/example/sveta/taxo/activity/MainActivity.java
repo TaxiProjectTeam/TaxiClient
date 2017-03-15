@@ -23,9 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.example.sveta.taxo.ApiInterface;
+import com.example.sveta.taxo.api.ApiInterface;
 import com.example.sveta.taxo.R;
-import com.example.sveta.taxo.RouteApiClient;
+import com.example.sveta.taxo.api.RouteApiClient;
 import com.example.sveta.taxo.adapter.AddressArrayAdapter;
 import com.example.sveta.taxo.adapter.AddressLineAdapter;
 import com.example.sveta.taxo.adapter.OnFocusItemListener;
@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.fabric.sdk.android.Fabric;
 import retrofit2.Call;
@@ -163,15 +165,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 viewHolder.editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Toast.makeText(getApplicationContext(), "Click", Toast.LENGTH_LONG).show();
+                        String addressString = viewHolder.editText.getText().toString();
+                        if (validateAddress(addressString)) {
+                            Address address = getLocationFromAddress(addressString);
+                            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                            Marker marker = googleMap.addMarker(markerOptions.position(latLng));
+
+                            addAddressesToHashMap(latLng);
+                            //deleteOldMarker(marker);
+                        }
                     }
                 });
                 viewHolder.editText.setAdapter(addressArrayAdapter);
-                if (!viewHolder.editText.getText().toString().equals("")) {
-                    LatLng latLng = new LatLng(getLocationFromAddress(viewHolder.editText.getText().toString()).getLatitude(),
-                            getLocationFromAddress(viewHolder.editText.getText().toString()).getLongitude());
-                    addAddressesToHashMap(latLng);
-                }
             }
         });
 
@@ -365,13 +370,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void getRoute() {
+        Double startLat = null;
+        Double startLng = null;
+        Double destinationLat = null;
+        Double destinationLng = null;
+
         if (startPosition.size() != 0 && destinationPositions.size() != 0) {
-            Double startLat = startPosition.get(getString(R.string.latitude));
-            Double startLng = startPosition.get(getString(R.string.longitude));
+            startLat = startPosition.get(getString(R.string.latitude));
+            startLng = startPosition.get(getString(R.string.longitude));
+            destinationLat = destinationPositions.get("0").get(getString(R.string.latitude));
+            destinationLng = destinationPositions.get("0").get(getString(R.string.longitude));
+        }
+        else if (destinationPositions.size() > 1) {
+            startLat = destinationPositions.get(destinationPositions.size() - 2 + "").get(getString(R.string.latitude));
+            startLng = destinationPositions.get(destinationPositions.size() - 2 + "").get(getString(R.string.longitude));
+            destinationLat = destinationPositions.get(destinationPositions.size() - 1 + "").get(getString(R.string.latitude));
+            destinationLng = destinationPositions.get(destinationPositions.size() - 1 + "").get(getString(R.string.longitude));
+        }
 
-            Double destinationLat = destinationPositions.get("0").get(getString(R.string.latitude));
-            Double destinationLng = destinationPositions.get("0").get(getString(R.string.longitude));
-
+        if (startLat != null && startLng != null && destinationLat != null && destinationLng != null) {
             routeModelCall = routeApiInterface.getRoute(startLat + "," + startLng,
                     destinationLat + "," + destinationLng);
 
@@ -391,5 +408,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         }
+    }
+
+    private boolean validateAddress (String address) {
+        String[] addressArray = address.split(" ");
+        String pattern = "(\\d+)(([\\\\]\\d+)?)";
+        Pattern r = Pattern.compile(pattern);
+        Matcher matcher = r.matcher(addressArray[addressArray.length - 1]);
+        return matcher.matches();
     }
 }

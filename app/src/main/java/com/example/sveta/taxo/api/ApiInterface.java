@@ -1,4 +1,4 @@
-package com.example.sveta.taxo;
+package com.example.sveta.taxo.api;
 
 import com.example.sveta.taxo.model.RouteResponse;
 

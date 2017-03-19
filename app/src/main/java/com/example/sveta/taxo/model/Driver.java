@@ -2,6 +2,8 @@ package com.example.sveta.taxo.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.HashMap;
+
 /**
  * Created by Sveta on 20.02.2017.
  */
@@ -11,15 +13,17 @@ public class Driver {
     private String phoneNumber;
     private String carModel;
     private String carNumber;
+    private HashMap<String, Double> driverPos;
 
     public Driver() {
     }
 
-    public Driver(String name, String phoneNumber, String carModel, String carNumber) {
+    public Driver(String name, String phoneNumber, String carModel, String carNumber, HashMap<String, Double> driverPos) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.carModel = carModel;
         this.carNumber = carNumber;
+        this.driverPos = driverPos;
     }
 
     public String getName() {
@@ -38,6 +42,10 @@ public class Driver {
         return carNumber;
     }
 
+    public HashMap<String, Double> getDriverPos() {
+        return driverPos;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -52,5 +60,9 @@ public class Driver {
 
     public void setCarNumber(String carNumber) {
         this.carNumber = carNumber;
+    }
+
+    public void setDriverPos(HashMap<String, Double> driverPos) {
+        this.driverPos = driverPos;
     }
 }

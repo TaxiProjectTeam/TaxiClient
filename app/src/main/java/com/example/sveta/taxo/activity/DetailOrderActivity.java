@@ -9,11 +9,16 @@ import com.example.sveta.taxo.model.Driver;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
 
 public class DetailOrderActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final String DRIVER_CHILD = "drivers";
@@ -27,6 +32,8 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private TextView carNumber;
     private TextView priceTotal;
     private TextView orderStatus;
+    private MarkerOptions markerOptions;
+    private GoogleMap googleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +64,9 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                             driverPhoneNumber.setText(driver.getPhoneNumber());
                             carModel.setText(driver.getCarModel());
                             carNumber.setText(driver.getCarNumber());
+                            LatLng driverPosition = new LatLng(driver.getDriverPos().get(getString(R.string.latitude)),
+                                    driver.getDriverPos().get(getString(R.string.longitude)));
+                            googleMap.addMarker(markerOptions.position(driverPosition));
                             changeOrderStatus(STATUS_WAITING);
                         }
 
@@ -90,6 +100,7 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+        this.googleMap = googleMap;
+        markerOptions = new MarkerOptions();
     }
 }

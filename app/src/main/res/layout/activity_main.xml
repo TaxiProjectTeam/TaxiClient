@@ -12,6 +12,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/linear_layout"
         app:cameraZoom="13"
         app:cameraTargetLat="49.441153"
         app:cameraTargetLng="32.064271"/>
@@ -23,7 +24,8 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/linear_layout">
 
         <RelativeLayout
             android:layout_width="match_parent"

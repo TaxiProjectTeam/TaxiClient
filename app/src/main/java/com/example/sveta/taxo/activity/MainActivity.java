@@ -32,6 +32,7 @@ import com.example.sveta.taxo.adapter.OnFocusItemListener;
 import com.example.sveta.taxo.model.ModelAddressLine;
 import com.example.sveta.taxo.model.Order;
 import com.example.sveta.taxo.model.RouteResponse;
+import com.example.sveta.taxo.utility.AddressesConverter;
 import com.example.sveta.taxo.utility.SwipeHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -47,6 +48,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -103,10 +105,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
+    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Polyline> routes = new HashMap<>();
     private HashMap<String, Double> startPosition = new HashMap<>();
     private HashMap<String, HashMap<String, Double>> destinationPositions = new HashMap<>();
+
     private List<LatLng> routePoints = new ArrayList<>();
     private int totalPrice;
+    private boolean mapClick = false;
+    private int distance;
+    private int duration;
+    private int currentDistance;
+    private int currentDuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         routeApiInterface = RouteApiClient.getClient().create(ApiInterface.class);
-        polylineOptions = new PolylineOptions();
 
         total = (TextView) findViewById(R.id.total);
 
@@ -141,6 +149,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        autocompleteFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
+                .build();
+        addressArrayAdapter = new AddressArrayAdapter(this, android.R.layout.simple_list_item_1, CHERCASSY, autocompleteFilter);
+
         modelAddressLines = new ArrayList<>();
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.start_address)));
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.destination_address)));
@@ -152,12 +165,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
 
-        autocompleteFilter = new AutocompleteFilter.Builder()
-                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
-                .build();
-        addressArrayAdapter = new AddressArrayAdapter(this, android.R.layout.simple_list_item_1, CHERCASSY, autocompleteFilter);
-
-
         adapter.setOnFocusItemListener(new OnFocusItemListener() {
             @Override
             public void onItemFocus(int position) {
@@ -166,9 +173,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String addressString = viewHolder.editText.getText().toString();
-                        if (validateAddress(addressString)) {
-                            Address address = getLocationFromAddress(addressString);
-                            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        if (validateAddress(addressString) && !mapClick) {
+                            LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
                             Marker marker = googleMap.addMarker(markerOptions.position(latLng));
 
                             addAddressesToHashMap(latLng);
@@ -197,10 +203,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
                     if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
-                        getAddressFromLocation(geoPosition);
+                        viewHolder.editText.setText(AddressesConverter.getAddressFromLocation(getApplicationContext(), geoPosition));
                         addAddressesToHashMap(geoPosition);
                         deleteOldMarker(marker);
-                        drawRoute();
+                        getRoute();
                     }
                 }
             }
@@ -253,13 +259,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void drawRoute() {
-        polylineOptions.width(4);
+        polylineOptions = new PolylineOptions();
+        polylineOptions.width(8f);
         polylineOptions.color(Color.BLUE);
-        getRoute();
         for(LatLng point : routePoints){
             polylineOptions.add(point);
         }
-        googleMap.addPolyline(polylineOptions);
+        Polyline polyline = googleMap.addPolyline(polylineOptions);
+        distance += currentDistance;
+        duration += currentDuration;
+        deleteOldDrawingRoute(polyline);
     }
 
     @Override
@@ -284,10 +293,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 Marker marker = googleMap.addMarker(markerOptions.position(latLng));
-                getAddressFromLocation(latLng);
+                viewHolder.editText.setText(AddressesConverter.getAddressFromLocation(getApplicationContext(), latLng));
                 addAddressesToHashMap(latLng);
                 deleteOldMarker(marker);
-                drawRoute();
+                getRoute();
+                mapClick = true;
             }
         });
     }
@@ -318,28 +328,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void getAddressFromLocation(LatLng latLng) {
-        Geocoder geocoder = new Geocoder(MainActivity.this);
-        List<Address> addresses = null;
-        try {
-            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        } catch (IOException e) {}
-        String address = addresses.get(0).getAddressLine(0);
-        viewHolder.editText.setText(address);
-    }
-
-    private Address getLocationFromAddress(String address) {
-        Geocoder geocoder = new Geocoder(MainActivity.this);
-        try {
-            List<Address> location = geocoder.getFromLocationName(address, 5);
-            return location.get(0);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private void addAddressesToHashMap(LatLng latLng) {
         if (viewHolder.getAdapterPosition() == 0) {
             startPosition.put(getString(R.string.latitude), latLng.latitude);
@@ -357,14 +345,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             markers.put(viewHolder, marker);
         else {
             markers.get(viewHolder).remove();
+            distance -= currentDistance;
+            duration -= currentDuration;
             markers.put(viewHolder, marker);
+        }
+    }
+
+    public void deleteOldDrawingRoute(Polyline polyline) {
+        if (routes.get(viewHolder) == null)
+            routes.put(viewHolder, polyline);
+        else {
+            routes.get(viewHolder).remove();
+            routes.put(viewHolder, polyline);
         }
     }
 
     private void displayTotalPrice() {
         String pricePerKilometres = firebaseRemoteConfig.getString(PRICE_PER_KILOMETRES_KEY);
         String startingPrice = firebaseRemoteConfig.getString(STARTING_PRICE_KEY);
-        totalPrice = Integer.parseInt(pricePerKilometres) + Integer.parseInt(startingPrice);
+        totalPrice = Integer.parseInt(pricePerKilometres) * distance / 1000 + Integer.parseInt(startingPrice);
         String result = totalPrice + "";
         total.setText(result);
     }
@@ -375,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Double destinationLat = null;
         Double destinationLng = null;
 
-        if (startPosition.size() != 0 && destinationPositions.size() != 0) {
+        if (startPosition.size() != 0 && destinationPositions.size() != 0 && destinationPositions.size() < 2) {
             startLat = startPosition.get(getString(R.string.latitude));
             startLng = startPosition.get(getString(R.string.longitude));
             destinationLat = destinationPositions.get("0").get(getString(R.string.latitude));
@@ -398,6 +397,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onResponse(Call<RouteResponse> call, Response<RouteResponse> response) {
                         RouteResponse routeResponse = response.body();
                         routePoints = PolyUtil.decode(routeResponse.getPoints());
+                        currentDistance = routeResponse.getDistance();
+                        currentDuration = routeResponse.getDuration();
+                        drawRoute();
+                        displayTotalPrice();
+                        Toast.makeText(MainActivity.this, distance + " метрів, "
+                                + duration / 60 + " хв, "
+                                + duration % 60 + " c", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -405,7 +411,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     }
                 });
-
             }
         }
     }

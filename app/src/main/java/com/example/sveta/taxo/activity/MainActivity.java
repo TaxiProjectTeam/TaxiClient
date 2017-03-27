@@ -4,8 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,12 +21,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.example.sveta.taxo.api.ApiInterface;
 import com.example.sveta.taxo.R;
-import com.example.sveta.taxo.api.RouteApiClient;
 import com.example.sveta.taxo.adapter.AddressArrayAdapter;
 import com.example.sveta.taxo.adapter.AddressLineAdapter;
 import com.example.sveta.taxo.adapter.OnFocusItemListener;
+import com.example.sveta.taxo.api.ApiInterface;
+import com.example.sveta.taxo.api.RouteApiClient;
 import com.example.sveta.taxo.model.ModelAddressLine;
 import com.example.sveta.taxo.model.Order;
 import com.example.sveta.taxo.model.RouteResponse;
@@ -57,7 +55,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.maps.android.PolyUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -185,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 viewHolder.editText.setAdapter(addressArrayAdapter);
             }
         });
-
 
         ItemTouchHelper.Callback callback = new SwipeHelper(adapter);
         ItemTouchHelper helper = new ItemTouchHelper(callback);

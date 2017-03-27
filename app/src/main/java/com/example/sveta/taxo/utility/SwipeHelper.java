@@ -33,8 +33,10 @@ public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         adapter.deleteAddress(viewHolder.getAdapterPosition());
         ((AddressLineAdapter.EditTypeViewHolder) viewHolder).editText.setText("");
-        MainActivity.markers.get(viewHolder).remove();
-        MainActivity.markers.remove(viewHolder);
+        if (MainActivity.markers.get(viewHolder) != null) {
+            MainActivity.markers.get(viewHolder).remove();
+            MainActivity.markers.remove(viewHolder);
+        }
     }
 
     @Override

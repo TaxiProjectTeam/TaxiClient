@@ -1,7 +1,6 @@
 package com.example.sveta.taxo.adapter;
 
 import android.content.Context;
-import android.location.Address;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ArrayAdapter;
@@ -74,9 +73,8 @@ public class AddressArrayAdapter extends ArrayAdapter<String> implements Filtera
             while (iterator.hasNext()) {
                 AutocompletePrediction prediction = iterator.next();
                 String[] array = prediction.getSecondaryText(null).toString().split(", ");
-                if (array[0].equals("Черкаси")) {
+                if (array[0].equals("Черкаси"))
                     resultList.add(prediction.getPrimaryText(null));
-                }
             }
             // Buffer release
             autocompletePredictions.release();

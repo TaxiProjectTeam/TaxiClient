@@ -11,6 +11,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/information"
         app:cameraZoom="13"
         app:cameraTargetLat="49.441153"
         app:cameraTargetLng="32.064271"

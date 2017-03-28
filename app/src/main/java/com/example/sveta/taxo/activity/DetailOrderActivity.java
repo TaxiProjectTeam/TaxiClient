@@ -1,24 +1,38 @@
 package com.example.sveta.taxo.activity;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import com.example.sveta.taxo.R;
+import com.example.sveta.taxo.api.ApiInterface;
+import com.example.sveta.taxo.api.RouteApiClient;
 import com.example.sveta.taxo.model.Driver;
+import com.example.sveta.taxo.model.Order;
+import com.example.sveta.taxo.model.RouteResponse;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.PolyUtil;
 
-import java.util.HashMap;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DetailOrderActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final String DRIVER_CHILD = "drivers";
@@ -34,6 +48,13 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private TextView orderStatus;
     private MarkerOptions markerOptions;
     private GoogleMap googleMap;
+    private LatLng driverPosition;
+    private ApiInterface routeApiInterface;
+    private List<LatLng> routePoints;
+    private Call<RouteResponse> routeModelCall;
+    private LatLng startPosition;
+    private PolylineOptions polylineOptions;
+    private String status;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +70,20 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
+        routeApiInterface = RouteApiClient.getClient().create(ApiInterface.class);
+
         String orderKey = getIntent().getStringExtra("orderKey");
 
         databaseReference.child(ORDER_CHILD).child(orderKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String driverId;
+                Order order = dataSnapshot.getValue(Order.class);
+                startPosition = new LatLng(order.getFromCoords().get(getString(R.string.latitude)),
+                        order.getDriverPos().get(getString(R.string.longitude)));
+                driverPosition = new LatLng(order.getDriverPos().get(getString(R.string.latitude)),
+                        order.getDriverPos().get(getString(R.string.longitude)));
+                status = order.getStatus();
                 if(!(driverId = (String) dataSnapshot.child("driverId").getValue()).equals(""))
                     databaseReference.child(DRIVER_CHILD).child(driverId).addValueEventListener(new ValueEventListener() {
                         @Override
@@ -64,10 +93,16 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                             driverPhoneNumber.setText(driver.getPhoneNumber());
                             carModel.setText(driver.getCarModel());
                             carNumber.setText(driver.getCarNumber());
-                            LatLng driverPosition = new LatLng(driver.getDriverPos().get(getString(R.string.latitude)),
-                                    driver.getDriverPos().get(getString(R.string.longitude)));
+
+                            googleMap.addMarker(markerOptions.position(startPosition));
                             googleMap.addMarker(markerOptions.position(driverPosition));
-                            changeOrderStatus(STATUS_WAITING);
+
+                            if (status.equals("arrived"))
+                                changeOrderStatus(STATUS_READY);
+                            else if (status.equals("accepted")) {
+                                changeOrderStatus(STATUS_WAITING);
+                                getRoute();
+                            }
                         }
 
                         @Override
@@ -102,5 +137,42 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
         markerOptions = new MarkerOptions();
+    }
+
+    private void getRoute() {
+        routeModelCall = routeApiInterface.getRoute(driverPosition.latitude + "," + driverPosition.longitude,
+                startPosition.latitude + "," + startPosition.longitude);
+
+        if (routeModelCall != null) {
+            routeModelCall.enqueue(new Callback<RouteResponse>() {
+                @Override
+                public void onResponse(Call<RouteResponse> call, Response<RouteResponse> response) {
+                    RouteResponse routeResponse = response.body();
+                    routePoints = PolyUtil.decode(routeResponse.getPoints());
+                    drawRoute();
+                }
+
+                @Override
+                public void onFailure(Call<RouteResponse> call, Throwable t) {
+
+                }
+            });
+        }
+    }
+
+    private void drawRoute() {
+        LatLngBounds.Builder latLngBuilder = new LatLngBounds.Builder();
+        polylineOptions = new PolylineOptions();
+        polylineOptions.width(8f);
+        polylineOptions.color(Color.BLUE);
+        for(LatLng point : routePoints){
+            polylineOptions.add(point);
+            latLngBuilder.include(point);
+        }
+        googleMap.addPolyline(polylineOptions);
+        int size = getResources().getDisplayMetrics().widthPixels;
+        LatLngBounds latLngBounds = latLngBuilder.build();
+        CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
+        googleMap.moveCamera(track);
     }
 }

@@ -2,6 +2,7 @@ package com.example.sveta.taxo.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -15,14 +16,14 @@ public class Order {
     private String driverId;
     private String status;
     private int time;
-    private HashMap<String, HashMap<String, Double>> toCoords;
+    private ArrayList<HashMap<String, Double>> toCoords;
     private int price;
     private String additionalComment;
 
     public Order() {
     }
 
-    public Order(HashMap<String, Double> fromCoords, HashMap<String, HashMap<String, Double>> toCoords, int price, String additionalComment) {
+    public Order(HashMap<String, Double> fromCoords, ArrayList<HashMap<String, Double>> toCoords, int price, String additionalComment) {
         this.fromCoords = fromCoords;
         this.toCoords = toCoords;
         this.price = price;
@@ -41,7 +42,7 @@ public class Order {
         return fromCoords;
     }
 
-    public HashMap<String, HashMap<String, Double>> getToCoords() {
+    public ArrayList<HashMap<String, Double>> getToCoords() {
         return toCoords;
     }
 

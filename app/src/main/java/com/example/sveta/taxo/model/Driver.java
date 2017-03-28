@@ -13,7 +13,6 @@ public class Driver {
     private String phoneNumber;
     private String carModel;
     private String carNumber;
-    private HashMap<String, Double> driverPos;
 
     public Driver() {
     }
@@ -23,7 +22,6 @@ public class Driver {
         this.phoneNumber = phoneNumber;
         this.carModel = carModel;
         this.carNumber = carNumber;
-        this.driverPos = driverPos;
     }
 
     public String getName() {
@@ -42,10 +40,6 @@ public class Driver {
         return carNumber;
     }
 
-    public HashMap<String, Double> getDriverPos() {
-        return driverPos;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -62,7 +56,4 @@ public class Driver {
         this.carNumber = carNumber;
     }
 
-    public void setDriverPos(HashMap<String, Double> driverPos) {
-        this.driverPos = driverPos;
-    }
 }

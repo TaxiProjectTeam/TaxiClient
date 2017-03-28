@@ -37,6 +37,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
     public static HashMap<AddressLineAdapter.EditTypeViewHolder, Polyline> routes = new HashMap<>();
     private HashMap<String, Double> startPosition = new HashMap<>();
-    private HashMap<String, HashMap<String, Double>> destinationPositions = new HashMap<>();
+    private ArrayList<HashMap<String, Double>> destinationPositions = new ArrayList<>();
 
     private List<LatLng> routePoints = new ArrayList<>();
     private int totalPrice;
@@ -176,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             addAddressesToHashMap(latLng);
                             //deleteOldMarker(marker);
+                            getRoute();
                         }
                     }
                 });
@@ -255,13 +257,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void drawRoute() {
+        LatLngBounds.Builder latLngBuilder = new LatLngBounds.Builder();
         polylineOptions = new PolylineOptions();
         polylineOptions.width(8f);
         polylineOptions.color(Color.BLUE);
         for(LatLng point : routePoints){
             polylineOptions.add(point);
+            latLngBuilder.include(point);
         }
         Polyline polyline = googleMap.addPolyline(polylineOptions);
+        int size = getResources().getDisplayMetrics().widthPixels;
+        LatLngBounds latLngBounds = latLngBuilder.build();
+        CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
+        googleMap.moveCamera(track);
         distance += currentDistance;
         duration += currentDuration;
         deleteOldDrawingRoute(polyline);
@@ -332,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
-            destinationPositions.put(viewHolder.getAdapterPosition() - 1 + "", destinationPositionCoords);
+            destinationPositions.add(destinationPositionCoords);
         }
     }
 
@@ -373,14 +381,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (startPosition.size() != 0 && destinationPositions.size() != 0 && destinationPositions.size() < 2) {
             startLat = startPosition.get(getString(R.string.latitude));
             startLng = startPosition.get(getString(R.string.longitude));
-            destinationLat = destinationPositions.get("0").get(getString(R.string.latitude));
-            destinationLng = destinationPositions.get("0").get(getString(R.string.longitude));
+            destinationLat = destinationPositions.get(0).get(getString(R.string.latitude));
+            destinationLng = destinationPositions.get(0).get(getString(R.string.longitude));
         }
         else if (destinationPositions.size() > 1) {
-            startLat = destinationPositions.get(destinationPositions.size() - 2 + "").get(getString(R.string.latitude));
-            startLng = destinationPositions.get(destinationPositions.size() - 2 + "").get(getString(R.string.longitude));
-            destinationLat = destinationPositions.get(destinationPositions.size() - 1 + "").get(getString(R.string.latitude));
-            destinationLng = destinationPositions.get(destinationPositions.size() - 1 + "").get(getString(R.string.longitude));
+            startLat = destinationPositions.get(destinationPositions.size() - 2).get(getString(R.string.latitude));
+            startLng = destinationPositions.get(destinationPositions.size() - 2).get(getString(R.string.longitude));
+            destinationLat = destinationPositions.get(destinationPositions.size() - 1).get(getString(R.string.latitude));
+            destinationLng = destinationPositions.get(destinationPositions.size() - 1).get(getString(R.string.longitude));
         }
 
         if (startLat != null && startLng != null && destinationLat != null && destinationLng != null) {

@@ -22,4 +22,15 @@
     <string name="your_location">Ви знаходитесь тут</string>
     <string name="waiting_for_car">Зачекайте, водій вже прямує до Вас</string>
     <string name="car_ready">Водій вже прибув до Вас</string>
+    <string name="street">Вулиця</string>
+    <string name="house_number">№</string>
+    <string name="entrance">Під\'їзд</string>
+    <string name="big_bag">Великий багаж</string>
+    <string name="with_animal">З твариною</string>
+    <string name="smoking">Хочу палити</string>
+    <string name="more_4_persons">Більше 4 осіб</string>
+    <string name="listen_music">Хочу слухати музику</string>
+    <string name="ok_btn">Ок</string>
+    <string name="with_children">З дітьми</string>
+    <string name="other_wishes">Інші побажання</string>
 </resources>

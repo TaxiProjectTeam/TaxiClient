@@ -73,8 +73,9 @@ public class AddressArrayAdapter extends ArrayAdapter<String> implements Filtera
             while (iterator.hasNext()) {
                 AutocompletePrediction prediction = iterator.next();
                 String[] array = prediction.getSecondaryText(null).toString().split(", ");
-                if (array[0].equals("Черкаси"))
+                if (array[0].equals("Черкаси")) {
                     resultList.add(prediction.getPrimaryText(null));
+                }
             }
             // Buffer release
             autocompletePredictions.release();

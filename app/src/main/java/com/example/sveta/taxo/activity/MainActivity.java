@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 viewHolder.editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String addressString = viewHolder.editText.getText().toString();
+                        String addressString = "Черкаси, Черкаська область, Україна, " + viewHolder.editText.getText().toString();
                         if (validateAddress(addressString) && !mapClick) {
                             LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
                             Marker marker = googleMap.addMarker(markerOptions.position(latLng));

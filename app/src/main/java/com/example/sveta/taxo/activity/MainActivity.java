@@ -413,9 +413,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         currentDuration = routeResponse.getDuration();
                         drawRoute();
                         displayTotalPrice();
-                        Toast.makeText(MainActivity.this, distance + " метрів, "
-                                + duration / 60 + " хв, "
-                                + duration % 60 + " c", Toast.LENGTH_LONG).show();
                     }
 
                     @Override

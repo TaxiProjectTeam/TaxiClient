@@ -14,14 +14,16 @@ import com.example.sveta.taxo.model.ModelAddressLine;
 public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     AddressLineAdapter adapter;
+    MainActivity activity;
 
     public SwipeHelper(int dragDirs, int swipeDirs) {
         super(dragDirs, swipeDirs);
     }
 
-    public SwipeHelper(AddressLineAdapter adapter) {
+    public SwipeHelper(AddressLineAdapter adapter, MainActivity activity) {
         super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
         this.adapter = adapter;
+        this.activity = activity;
     }
 
     @Override
@@ -31,11 +33,15 @@ public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        adapter.deleteAddress(viewHolder.getAdapterPosition());
+        int pos = viewHolder.getAdapterPosition();
+        adapter.deleteAddress(pos);
         ((AddressLineAdapter.EditTypeViewHolder) viewHolder).editText.setText("");
-        if (MainActivity.markers.get(viewHolder) != null) {
-            MainActivity.markers.get(viewHolder).remove();
-            MainActivity.markers.remove(viewHolder);
+        if (activity.markers.get(viewHolder) != null) {
+            activity.markers.get(viewHolder).remove();
+            activity.markers.remove(viewHolder);
+            activity.destinationPositions.remove(pos - 1);
+            activity.routes.get(viewHolder).remove();
+            activity.getRoute();
         }
     }
 

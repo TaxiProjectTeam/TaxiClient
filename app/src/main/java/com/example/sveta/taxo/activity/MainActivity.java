@@ -49,6 +49,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.internal.IPolylineDelegate;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
@@ -59,6 +60,7 @@ import com.google.maps.android.PolyUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -100,12 +102,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final LatLngBounds CHERCASSY = new LatLngBounds(
             new LatLng(49.364583, 31.9578749), new LatLng(49.49797, 32.140585));
     private AddressArrayAdapter addressArrayAdapter;
+    private AddressLineAdapter adapter;
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
-    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
-    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Polyline> routes = new HashMap<>();
+    public HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
+    public HashMap<AddressLineAdapter.EditTypeViewHolder, Polyline> routes = new HashMap<>();
     private HashMap<String, Double> startPosition = new HashMap<>();
-    private ArrayList<HashMap<String, Double>> destinationPositions = new ArrayList<>();
+    public ArrayList<HashMap<String, Double>> destinationPositions = new ArrayList<>();
 
     private List<LatLng> routePoints = new ArrayList<>();
     private int totalPrice;
@@ -157,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.EDIT_TYPE, getString(R.string.destination_address)));
         modelAddressLines.add(new ModelAddressLine(ModelAddressLine.TEXT_TYPE, getString(R.string.add_address)));
 
-        final AddressLineAdapter adapter = new AddressLineAdapter(modelAddressLines, this);
+        adapter = new AddressLineAdapter(modelAddressLines, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view_address);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -185,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        ItemTouchHelper.Callback callback = new SwipeHelper(adapter);
+        ItemTouchHelper.Callback callback = new SwipeHelper(adapter, this);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
@@ -337,6 +340,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             startPosition.put(getString(R.string.latitude), latLng.latitude);
             startPosition.put(getString(R.string.longitude), latLng.longitude);
         } else {
+            if (adapter.getItemCount() == 3)
+                destinationPositions.clear();
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
@@ -372,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         total.setText(result);
     }
 
-    private void getRoute() {
+    public void getRoute() {
         Double startLat = null;
         Double startLng = null;
         Double destinationLat = null;
@@ -383,6 +388,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             startLng = startPosition.get(getString(R.string.longitude));
             destinationLat = destinationPositions.get(0).get(getString(R.string.latitude));
             destinationLng = destinationPositions.get(0).get(getString(R.string.longitude));
+            if (routes.size() > 0)
+                for (Map.Entry<AddressLineAdapter.EditTypeViewHolder, Polyline> pair : routes.entrySet())
+                    pair.getValue().remove();
         }
         else if (destinationPositions.size() > 1) {
             startLat = destinationPositions.get(destinationPositions.size() - 2).get(getString(R.string.latitude));

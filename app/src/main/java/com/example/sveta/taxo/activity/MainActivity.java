@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -49,13 +51,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.internal.IPolylineDelegate;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.maps.android.PolyUtil;
+import com.google.maps.android.ui.IconGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int duration;
     private int currentDistance;
     private int currentDuration;
+    private boolean isTarget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,16 +177,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String addressString = "Черкаси, Черкаська область, Україна, " + viewHolder.editText.getText().toString();
-                        if (validateAddress(addressString) && !mapClick) {
+                        if (validateAddress(addressString) && !mapClick && !isTarget) {
                             LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
-                            Marker marker = googleMap.addMarker(markerOptions.position(latLng));
-
+                            Marker marker;
+                            if (viewHolder.getAdapterPosition() == 0)
+                                marker = addStartMarker(latLng);
+                            else
+                                marker = addEndMarker(latLng);
                             addAddressesToHashMap(latLng);
                             //deleteOldMarker(marker);
                             getRoute();
                         }
                     }
                 });
+                isTarget = false;
                 viewHolder.editText.setAdapter(addressArrayAdapter);
             }
         });
@@ -196,9 +203,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         targetLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isTarget = true;
                 if (mapReady) {
                     geoPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    Marker marker = googleMap.addMarker(markerOptions.position(geoPosition).title(getString(R.string.your_location)));
+                    Marker marker = addStartMarker(geoPosition);
 
                     CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
                     googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
@@ -299,7 +307,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                Marker marker = googleMap.addMarker(markerOptions.position(latLng));
+                Marker marker;
+                if (viewHolder.getAdapterPosition() == 0)
+                    marker = addStartMarker(latLng);
+                else
+                    marker = addEndMarker(latLng);
                 viewHolder.editText.setText(AddressesConverter.getAddressFromLocation(getApplicationContext(), latLng));
                 addAddressesToHashMap(latLng);
                 deleteOldMarker(marker);
@@ -327,7 +339,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        if (!connectionResult.isSuccess())
+            Toast.makeText(this, "Відсутнє з'єднання з інтернетом!!!", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -430,5 +443,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Pattern r = Pattern.compile(pattern);
         Matcher matcher = r.matcher(addressArray[addressArray.length - 1]);
         return matcher.matches();
+    }
+
+    private Marker addStartMarker(LatLng position) {
+        IconGenerator iconFactory = new IconGenerator(MainActivity.this);
+        iconFactory.setTextAppearance(R.style.markers_text_style);
+        iconFactory.setColor(ContextCompat.getColor(MainActivity.this, R.color.markers_green_background));
+        return googleMap.addMarker(markerOptions.position(position)
+                .icon(BitmapDescriptorFactory
+                        .fromBitmap(iconFactory
+                                .makeIcon(getResources().getString(R.string.markers_start_label)))));
+    }
+
+    private Marker addEndMarker(LatLng position) {
+        IconGenerator iconFactory = new IconGenerator(MainActivity.this);
+        iconFactory.setTextAppearance(R.style.markers_text_style);
+        iconFactory.setColor(ContextCompat.getColor(MainActivity.this, R.color.markers_red_background));
+        return googleMap.addMarker(markerOptions.position(position)
+                .icon(BitmapDescriptorFactory
+                        .fromBitmap(iconFactory
+                                .makeIcon(getResources().getString(R.string.markers_end_label)))));
     }
 }

@@ -176,14 +176,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 viewHolder.editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String addressString = "Черкаси, Черкаська область, Україна, " + viewHolder.editText.getText().toString();
-                        if (validateAddress(addressString) && !mapClick && !isTarget) {
+                        String address = viewHolder.editText.getText().toString();
+                        String addressString = "Черкаси, Черкаська область, Україна, " + address;
+                        if (validateAddress(address) && !mapClick && !isTarget) {
                             LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
                             Marker marker;
                             if (viewHolder.getAdapterPosition() == 0)
-                                marker = addStartMarker(latLng);
+                                marker = addStartMarker(latLng, address);
                             else
-                                marker = addEndMarker(latLng);
+                                marker = addEndMarker(latLng, address);
                             addAddressesToHashMap(latLng);
                             //deleteOldMarker(marker);
                             getRoute();
@@ -205,14 +206,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 isTarget = true;
                 if (mapReady) {
-                    geoPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    Marker marker = addStartMarker(geoPosition);
-
-                    CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
-                    googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
-
                     if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
-                        viewHolder.editText.setText(AddressesConverter.getAddressFromLocation(getApplicationContext(), geoPosition));
+                        geoPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                        String address = AddressesConverter.getAddressFromLocation(getApplicationContext(), geoPosition);
+                        Marker marker = addStartMarker(geoPosition, address);
+
+                        CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
+                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
+
+                        viewHolder.editText.setText(address);
                         addAddressesToHashMap(geoPosition);
                         deleteOldMarker(marker);
                         getRoute();
@@ -239,26 +241,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 boolean isEmpty = false;
+                boolean isCorrectAddress = false;
                 for (int i = 0; i < adapter.getItemCount() - 1; i++) {
-                    AddressLineAdapter.EditTypeViewHolder holder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                    if (holder.editText == null || (holder.editText.getText().toString()).equals(""))
+                    AddressLineAdapter.EditTypeViewHolder holder =
+                            (AddressLineAdapter.EditTypeViewHolder) recyclerView
+                                    .findViewHolderForAdapterPosition(i);
+
+                    String ad = holder.editText.getText().toString();
+                    if (holder.editText == null || holder.editText.getText().toString().equals(""))
                         isEmpty = true;
+                    else if (!validateAddress(ad))
+                        isCorrectAddress = true;
                 }
-                if (!isEmpty) {
+
+                if (isEmpty)
+                    Toast.makeText(MainActivity.this, "Ви ввели не всі поля з адресами", Toast.LENGTH_SHORT).show();
+                else if (isCorrectAddress)
+                    Toast.makeText(MainActivity.this, "Ви ввели некоректну адресу", Toast.LENGTH_SHORT).show();
+                else {
                     Order order = new Order(
                             startPosition,
                             destinationPositions,
                             total.getText().toString(),
                             additionalComment.getText().toString());
+
                     databaseReference = databaseReference.child(ORDER_CHILD).push();
                     String orderKey = databaseReference.getKey();
                     databaseReference.setValue(order);
                     Intent intent = new Intent(getApplicationContext(), DetailOrderActivity.class);
                     intent.putExtra("orderKey", orderKey);
                     startActivity(intent);
-                }
-                else
-                    Toast.makeText(MainActivity.this, "Ви ввели не всі поля з адресами", Toast.LENGTH_SHORT).show();
+            }
             }
         });
 
@@ -308,11 +321,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 Marker marker;
+                String address = AddressesConverter.getAddressFromLocation(getApplicationContext(), latLng);
                 if (viewHolder.getAdapterPosition() == 0)
-                    marker = addStartMarker(latLng);
+                    marker = addStartMarker(latLng, address);
                 else
-                    marker = addEndMarker(latLng);
-                viewHolder.editText.setText(AddressesConverter.getAddressFromLocation(getApplicationContext(), latLng));
+                    marker = addEndMarker(latLng, address);
+                viewHolder.editText.setText(address);
                 addAddressesToHashMap(latLng);
                 deleteOldMarker(marker);
                 getRoute();
@@ -438,30 +452,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private boolean validateAddress (String address) {
-        String[] addressArray = address.split(" ");
-        String pattern = "(\\d+)(([\\\\]\\d+)?)";
+        String pattern = "((([А-ЯЄІЇ][а-яіїє']+)(\\s)(провулок))|" +
+                "(((в|В)улиця|(п|П)ровулок|(б|Б)ульвар)(\\s)((((\\d)+([-]))?)[А-ЯЄІЇ]?[а-яіїє']+)" +
+                "(((\\s)([А-ЯЄІЇ]?[а-яіїє']+))?)))" +
+                "([,]?)" +
+                "(\\s)" +
+                "(\\d+)" +
+                "((/\\d+)?)";
         Pattern r = Pattern.compile(pattern);
-        Matcher matcher = r.matcher(addressArray[addressArray.length - 1]);
+        Matcher matcher = r.matcher(address);
         return matcher.matches();
     }
 
-    private Marker addStartMarker(LatLng position) {
+    private Marker addStartMarker(LatLng position, String address) {
         IconGenerator iconFactory = new IconGenerator(MainActivity.this);
         iconFactory.setTextAppearance(R.style.markers_text_style);
         iconFactory.setColor(ContextCompat.getColor(MainActivity.this, R.color.markers_green_background));
         return googleMap.addMarker(markerOptions.position(position)
                 .icon(BitmapDescriptorFactory
                         .fromBitmap(iconFactory
-                                .makeIcon(getResources().getString(R.string.markers_start_label)))));
+                                .makeIcon(getResources().getString(R.string.markers_start_label))))
+                .title(address));
     }
 
-    private Marker addEndMarker(LatLng position) {
+    private Marker addEndMarker(LatLng position, String address) {
         IconGenerator iconFactory = new IconGenerator(MainActivity.this);
         iconFactory.setTextAppearance(R.style.markers_text_style);
         iconFactory.setColor(ContextCompat.getColor(MainActivity.this, R.color.markers_red_background));
         return googleMap.addMarker(markerOptions.position(position)
                 .icon(BitmapDescriptorFactory
                         .fromBitmap(iconFactory
-                                .makeIcon(getResources().getString(R.string.markers_end_label)))));
+                                .makeIcon(getResources().getString(R.string.markers_end_label))))
+                .title(address));
     }
 }

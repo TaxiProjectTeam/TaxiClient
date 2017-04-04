@@ -92,7 +92,8 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                 driverPosition = new LatLng(order.getDriverPos().get(getString(R.string.latitude)),
                         order.getDriverPos().get(getString(R.string.longitude)));
                 status = order.getStatus();
-                priceTotal.setText(order.getPrice() + " грн");
+                String price = order.getPrice() + " грн";
+                priceTotal.setText(price);
                 if(!(driverId = (String) dataSnapshot.child("driverId").getValue()).equals(""))
                     databaseReference.child(DRIVER_CHILD).child(driverId).addValueEventListener(new ValueEventListener() {
                         @Override

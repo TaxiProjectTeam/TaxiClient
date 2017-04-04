@@ -22,7 +22,7 @@
     <string name="your_location">Ви знаходитесь тут</string>
     <string name="waiting_for_car">Зачекайте, водій вже прямує до Вас</string>
     <string name="car_ready">Водій вже прибув до Вас</string>
-    <string name="markers_start_label">Початок</string>
+    <string name="markers_start_label">Початок руху</string>
     <string name="markers_end_label">Точка призначення</string>
     <string name="markers_driver_position">Водій</string>
 </resources>

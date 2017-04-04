@@ -17,13 +17,13 @@ public class Order {
     private String status;
     private int time;
     private ArrayList<HashMap<String, Double>> toCoords;
-    private int price;
+    private String price;
     private String additionalComment;
 
     public Order() {
     }
 
-    public Order(HashMap<String, Double> fromCoords, ArrayList<HashMap<String, Double>> toCoords, int price, String additionalComment) {
+    public Order(HashMap<String, Double> fromCoords, ArrayList<HashMap<String, Double>> toCoords, String price, String additionalComment) {
         this.fromCoords = fromCoords;
         this.toCoords = toCoords;
         this.price = price;
@@ -46,7 +46,7 @@ public class Order {
         return toCoords;
     }
 
-    public int getPrice() {
+    public String getPrice() {
         return price;
     }
 

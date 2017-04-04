@@ -1,6 +1,7 @@
 package com.example.sveta.taxo.activity;
 
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -16,8 +17,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -27,6 +30,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.PolyUtil;
+import com.google.maps.android.ui.IconGenerator;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -46,6 +52,7 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private TextView carNumber;
     private TextView priceTotal;
     private TextView orderStatus;
+    private TextView carColor;
     private MarkerOptions markerOptions;
     private GoogleMap googleMap;
     private LatLng driverPosition;
@@ -67,6 +74,7 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
         carNumber = (TextView) findViewById(R.id.car_number);
         priceTotal = (TextView) findViewById(R.id.price_total);
         orderStatus = (TextView) findViewById(R.id.order_status);
+        carColor = (TextView) findViewById(R.id.car_color);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
@@ -80,10 +88,11 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                 String driverId;
                 Order order = dataSnapshot.getValue(Order.class);
                 startPosition = new LatLng(order.getFromCoords().get(getString(R.string.latitude)),
-                        order.getDriverPos().get(getString(R.string.longitude)));
+                        order.getFromCoords().get(getString(R.string.longitude)));
                 driverPosition = new LatLng(order.getDriverPos().get(getString(R.string.latitude)),
                         order.getDriverPos().get(getString(R.string.longitude)));
                 status = order.getStatus();
+                priceTotal.setText(order.getPrice() + " грн");
                 if(!(driverId = (String) dataSnapshot.child("driverId").getValue()).equals(""))
                     databaseReference.child(DRIVER_CHILD).child(driverId).addValueEventListener(new ValueEventListener() {
                         @Override
@@ -93,9 +102,10 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                             driverPhoneNumber.setText(driver.getPhoneNumber());
                             carModel.setText(driver.getCarModel());
                             carNumber.setText(driver.getCarNumber());
+                            carColor.setText(driver.getCarColor());
 
-                            googleMap.addMarker(markerOptions.position(startPosition));
-                            googleMap.addMarker(markerOptions.position(driverPosition));
+                            addStartMarker(startPosition);
+                            addEndMarker(driverPosition);
 
                             if (status.equals("arrived"))
                                 changeOrderStatus(STATUS_READY);
@@ -174,5 +184,25 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
         LatLngBounds latLngBounds = latLngBuilder.build();
         CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
         googleMap.moveCamera(track);
+    }
+
+    private void addStartMarker(LatLng position) {
+        IconGenerator iconFactory = new IconGenerator(DetailOrderActivity.this);
+        iconFactory.setTextAppearance(R.style.markers_text_style);
+        iconFactory.setColor(ContextCompat.getColor(DetailOrderActivity.this, R.color.markers_green_background));
+        googleMap.addMarker(markerOptions.position(position)
+                .icon(BitmapDescriptorFactory
+                        .fromBitmap(iconFactory
+                                .makeIcon(getResources().getString(R.string.markers_start_label)))));
+    }
+
+    private void addEndMarker(LatLng position) {
+        IconGenerator iconFactory = new IconGenerator(DetailOrderActivity.this);
+        iconFactory.setTextAppearance(R.style.markers_text_style);
+        iconFactory.setColor(ContextCompat.getColor(DetailOrderActivity.this, R.color.markers_red_background));
+        googleMap.addMarker(markerOptions.position(position)
+                .icon(BitmapDescriptorFactory
+                        .fromBitmap(iconFactory
+                                .makeIcon(getResources().getString(R.string.markers_driver_position)))));
     }
 }

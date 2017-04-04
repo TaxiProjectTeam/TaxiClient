@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Order order = new Order(
                             startPosition,
                             destinationPositions,
-                            Integer.parseInt(total.getText().toString()),
+                            total.getText().toString(),
                             additionalComment.getText().toString());
                     databaseReference = databaseReference.child(ORDER_CHILD).push();
                     String orderKey = databaseReference.getKey();

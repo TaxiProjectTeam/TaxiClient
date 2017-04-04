@@ -45,16 +45,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:id="@+id/information"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="@dimen/activity_vertical_margin">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -66,36 +66,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                tools:text="0 грн"
-                android:id="@+id/price_total"
-                style="@style/text_style"
-                />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
                 android:text="@string/driver_name"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                tools:text="Василь"
-                android:id="@+id/driver_name"
-                style="@style/text_style"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -107,35 +80,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                tools:text="093-909-43-36"
-                android:id="@+id/driver_phone_number"
-                style="@style/text_style"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
                 android:text="@string/car_brand"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                tools:text="Ford"
-                android:id="@+id/car_model"
-                style="@style/text_style"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -147,21 +94,51 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                tools:text="Синій"
-                style="@style/text_style"/>
+                android:text="@string/car_number"
+                style="@style/text_style"
+                android:paddingRight="@dimen/activity_horizontal_margin"/>
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="@string/car_number"
+                tools:text="0 грн"
+                android:id="@+id/price_total"
                 style="@style/text_style"
-                android:paddingRight="@dimen/activity_horizontal_margin"/>
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:text="Василь"
+                android:id="@+id/driver_name"
+                style="@style/text_style"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:text="093-909-43-36"
+                android:id="@+id/driver_phone_number"
+                style="@style/text_style"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:text="Ford"
+                android:id="@+id/car_model"
+                style="@style/text_style"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:text="Синій"
+                android:id="@+id/car_color"
+                style="@style/text_style"/>
 
             <TextView
                 android:layout_width="wrap_content"

@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 "([,]?)" +
                 "(\\s)" +
                 "(\\d+)" +
-                "((/\\d+)?)";
+                "(((/\\d+)|([а-д]))?)";
         Pattern r = Pattern.compile(pattern);
         Matcher matcher = r.matcher(address);
         return matcher.matches();

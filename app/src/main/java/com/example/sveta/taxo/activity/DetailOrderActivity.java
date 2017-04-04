@@ -1,6 +1,13 @@
 package com.example.sveta.taxo.activity;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,9 +27,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,8 +36,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.android.ui.IconGenerator;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -137,9 +140,11 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
         switch (status) {
             case (STATUS_WAITING):
                 orderStatus.setText(R.string.waiting_for_car);
+                getNotification(getString(R.string.waiting_for_car));
                 break;
             case (STATUS_READY):
                 orderStatus.setText(R.string.car_ready);
+                getNotification(getString(R.string.car_ready));
                 break;
         }
     }
@@ -205,5 +210,26 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                 .icon(BitmapDescriptorFactory
                         .fromBitmap(iconFactory
                                 .makeIcon(getResources().getString(R.string.markers_driver_position)))));
+    }
+
+    private void getNotification(String status) {
+        Intent intent = new Intent(this, DetailOrderActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.icon_notification)
+                .setContentTitle("Taxo")
+                .setContentText(status)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0, notificationBuilder.build());
     }
 }

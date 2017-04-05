@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -186,13 +188,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             else
                                 marker = addEndMarker(latLng, address);
                             addAddressesToHashMap(latLng);
-                            //deleteOldMarker(marker);
+                            deleteOldMarker(marker);
                             getRoute();
                         }
                     }
                 });
                 isTarget = false;
                 viewHolder.editText.setAdapter(addressArrayAdapter);
+
+                viewHolder.editText.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if (editable.toString().equals("")) {
+                            if (markers.get(viewHolder) != null)
+                                markers.get(viewHolder).remove();
+                            if (routes.get(viewHolder) != null)
+                                routes.get(viewHolder).remove();
+                            if (viewHolder.getAdapterPosition() == 0) {
+                                startPosition.clear();
+                                getRoute();
+                            }
+                            else {
+                                destinationPositions.remove(viewHolder.getAdapterPosition() - 1);
+                            }
+                       }
+                    }
+                });
             }
         });
 
@@ -455,10 +486,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         String pattern = "((([А-ЯЄІЇ][а-яіїє']+)(\\s)(провулок))|" +
                 "(((в|В)улиця|(п|П)ровулок|(б|Б)ульвар)(\\s)((((\\d)+([-]))?)[А-ЯЄІЇ]?[а-яіїє']+)" +
                 "(((\\s)([А-ЯЄІЇ]?[а-яіїє']+))?)))" +
-                "([,]?)" +
-                "(\\s)" +
-                "(\\d+)" +
-                "(((/\\d+)|([а-д]))?)";
+                "([,]?)(\\s)(\\d+)(((/\\d+)|([а-д])|([-]\\d+))?)";
         Pattern r = Pattern.compile(pattern);
         Matcher matcher = r.matcher(address);
         return matcher.matches();

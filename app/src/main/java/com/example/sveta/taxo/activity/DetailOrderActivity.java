@@ -92,8 +92,13 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                 Order order = dataSnapshot.getValue(Order.class);
                 startPosition = new LatLng(order.getFromCoords().get(getString(R.string.latitude)),
                         order.getFromCoords().get(getString(R.string.longitude)));
-                driverPosition = new LatLng(order.getDriverPos().get(getString(R.string.latitude)),
-                        order.getDriverPos().get(getString(R.string.longitude)));
+                try {
+                    driverPosition = new LatLng(order.getDriverPos().get(getString(R.string.latitude)),
+                            order.getDriverPos().get(getString(R.string.longitude)));
+                }
+                catch (Exception e){
+
+                }
                 status = order.getStatus();
                 String price = order.getPrice() + " грн";
                 priceTotal.setText(price);
@@ -108,14 +113,17 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                             carNumber.setText(driver.getCarNumber());
                             carColor.setText(driver.getCarColor());
 
-                            addStartMarker(startPosition);
-                            addEndMarker(driverPosition);
-
-                            if (status.equals("arrived"))
-                                changeOrderStatus(STATUS_READY);
-                            else if (status.equals("accepted")) {
-                                changeOrderStatus(STATUS_WAITING);
-                                getRoute();
+                            try {
+                                addStartMarker(startPosition);
+                                addEndMarker(driverPosition);
+                                if (status.equals("arrived"))
+                                    changeOrderStatus(STATUS_READY);
+                                else if (status.equals("accepted")) {
+                                    changeOrderStatus(STATUS_WAITING);
+                                    getRoute();
+                                }
+                            }
+                            catch (Exception e) {
                             }
                         }
 
@@ -163,9 +171,14 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
             routeModelCall.enqueue(new Callback<RouteResponse>() {
                 @Override
                 public void onResponse(Call<RouteResponse> call, Response<RouteResponse> response) {
-                    RouteResponse routeResponse = response.body();
-                    routePoints = PolyUtil.decode(routeResponse.getPoints());
-                    drawRoute();
+                    try {
+                        RouteResponse routeResponse = response.body();
+                        routePoints = PolyUtil.decode(routeResponse.getPoints());
+                        drawRoute();
+                    }
+                    catch (IndexOutOfBoundsException e){
+
+                    }
                 }
 
                 @Override

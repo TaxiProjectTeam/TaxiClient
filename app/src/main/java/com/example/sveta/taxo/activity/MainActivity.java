@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                 });
+                mapClick = false;
                 isTarget = false;
                 viewHolder.editText.setAdapter(addressArrayAdapter);
 
@@ -212,14 +213,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (editable.toString().equals("")) {
                             if (markers.get(viewHolder) != null)
                                 markers.get(viewHolder).remove();
+
                             if (routes.get(viewHolder) != null)
                                 routes.get(viewHolder).remove();
+
                             if (viewHolder.getAdapterPosition() == 0) {
                                 startPosition.clear();
                                 getRoute();
                             }
-                            else {
+                            else if (destinationPositions.size() != 0) {
                                 destinationPositions.remove(viewHolder.getAdapterPosition() - 1);
+                                getRoute();
                             }
                        }
                     }
@@ -412,8 +416,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             markers.put(viewHolder, marker);
         else {
             markers.get(viewHolder).remove();
-            distance -= currentDistance;
-            duration -= currentDuration;
             markers.put(viewHolder, marker);
         }
     }
@@ -441,25 +443,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Double destinationLat = null;
         Double destinationLng = null;
 
-        if (startPosition.size() != 0 && destinationPositions.size() != 0 && destinationPositions.size() < 2) {
+        if (startPosition.size() != 0 && destinationPositions.size() != 0) {
             startLat = startPosition.get(getString(R.string.latitude));
             startLng = startPosition.get(getString(R.string.longitude));
-            destinationLat = destinationPositions.get(0).get(getString(R.string.latitude));
-            destinationLng = destinationPositions.get(0).get(getString(R.string.longitude));
+            destinationLat = destinationPositions.get(destinationPositions.size() - 1).get(getString(R.string.latitude));
+            destinationLng = destinationPositions.get(destinationPositions.size() - 1).get(getString(R.string.longitude));
             if (routes.size() > 0)
                 for (Map.Entry<AddressLineAdapter.EditTypeViewHolder, Polyline> pair : routes.entrySet())
                     pair.getValue().remove();
         }
-        else if (destinationPositions.size() > 1) {
-            startLat = destinationPositions.get(destinationPositions.size() - 2).get(getString(R.string.latitude));
-            startLng = destinationPositions.get(destinationPositions.size() - 2).get(getString(R.string.longitude));
-            destinationLat = destinationPositions.get(destinationPositions.size() - 1).get(getString(R.string.latitude));
-            destinationLng = destinationPositions.get(destinationPositions.size() - 1).get(getString(R.string.longitude));
-        }
+        else
+            if (routes.size() > 0)
+                for (Map.Entry<AddressLineAdapter.EditTypeViewHolder, Polyline> pair : routes.entrySet())
+                    pair.getValue().remove();
 
         if (startLat != null && startLng != null && destinationLat != null && destinationLng != null) {
-            routeModelCall = routeApiInterface.getRoute(startLat + "," + startLng,
-                    destinationLat + "," + destinationLng);
+            if (destinationPositions.size() > 1) {
+                String waypoints = "";
+                for (int i = 0; i < destinationPositions.size() - 1; i++) {
+                    waypoints += "via:"
+                            + destinationPositions.get(i).get(getString(R.string.latitude))
+                            + ","
+                            + destinationPositions.get(i).get(getString(R.string.longitude));
+                    if (i < destinationPositions.size() - 1)
+                        waypoints += "|";
+                }
+                routeModelCall = routeApiInterface.getRouteWithTransitPoints(startLat + "," + startLng,
+                        destinationLat + "," + destinationLng,
+                        waypoints);
+            }
+            else
+                routeModelCall = routeApiInterface.getRoute(startLat + "," + startLng,
+                        destinationLat + "," + destinationLng);
 
             if (routeModelCall != null) {
                 routeModelCall.enqueue(new Callback<RouteResponse>() {
@@ -484,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private boolean validateAddress (String address) {
         String pattern = "((([А-ЯЄІЇ][а-яіїє']+)(\\s)(провулок))|" +
-                "(((в|В)улиця|(п|П)ровулок|(б|Б)ульвар)(\\s)((((\\d)+([-]))?)[А-ЯЄІЇ]?[а-яіїє']+)" +
+                "(((в|В)улиця|(п|П)ровулок|(б|Б)ульвар|(п|П)роспект)(\\s)((((\\d)+([-]))?)[А-ЯЄІЇ]?[а-яіїє']+)" +
                 "(((\\s)([А-ЯЄІЇ]?[а-яіїє']+))?)))" +
                 "([,]?)(\\s)(\\d+)(((/\\d+)|([а-д])|([-]\\d+))?)";
         Pattern r = Pattern.compile(pattern);

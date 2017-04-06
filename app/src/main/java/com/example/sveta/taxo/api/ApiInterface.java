@@ -12,6 +12,11 @@ import retrofit2.http.Query;
 
 public interface ApiInterface {
     @GET("/maps/api/directions/json")
-    Call<RouteResponse> getRoute(@Query("origin") String startLat,
-                                 @Query("destination") String startLng);
+    Call<RouteResponse> getRoute(@Query("origin") String start,
+                                 @Query("destination") String destination);
+
+    @GET("/maps/api/directions/json")
+    Call<RouteResponse> getRouteWithTransitPoints(@Query("origin") String start,
+                                                  @Query("destination") String destination,
+                                                  @Query("waypoints") String waypoints);
 }

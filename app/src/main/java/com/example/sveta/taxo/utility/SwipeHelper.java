@@ -38,8 +38,6 @@ public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         ((AddressLineAdapter.EditTypeViewHolder) viewHolder).editText.setText("");
         if (activity.markers.get(viewHolder) != null) {
             activity.markers.get(viewHolder).remove();
-            activity.markers.remove(viewHolder);
-            activity.destinationPositions.remove(pos - 1);
             activity.routes.get(viewHolder).remove();
             activity.getRoute();
         }

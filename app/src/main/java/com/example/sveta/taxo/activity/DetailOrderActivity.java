@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.TextView;
 
 import com.example.sveta.taxo.R;
@@ -27,7 +27,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -65,6 +67,8 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private LatLng startPosition;
     private PolylineOptions polylineOptions;
     private String status;
+    private Marker driverMarker;
+    private Polyline polyline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +119,11 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
 
                             try {
                                 addStartMarker(startPosition);
-                                addEndMarker(driverPosition);
+
+                                if (driverMarker != null)
+                                    driverMarker.remove();
+                                driverMarker = addEndMarker(driverPosition);
+
                                 if (status.equals("arrived"))
                                     changeOrderStatus(STATUS_READY);
                                 else if (status.equals("accepted")) {
@@ -194,11 +202,16 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
         polylineOptions = new PolylineOptions();
         polylineOptions.width(8f);
         polylineOptions.color(Color.BLUE);
+
         for(LatLng point : routePoints){
             polylineOptions.add(point);
             latLngBuilder.include(point);
         }
-        googleMap.addPolyline(polylineOptions);
+
+        if (polyline != null)
+            polyline.remove();
+        polyline = googleMap.addPolyline(polylineOptions);
+
         int size = getResources().getDisplayMetrics().widthPixels;
         LatLngBounds latLngBounds = latLngBuilder.build();
         CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
@@ -215,11 +228,11 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                                 .makeIcon(getResources().getString(R.string.markers_start_label)))));
     }
 
-    private void addEndMarker(LatLng position) {
+    private Marker addEndMarker(LatLng position) {
         IconGenerator iconFactory = new IconGenerator(DetailOrderActivity.this);
         iconFactory.setTextAppearance(R.style.markers_text_style);
         iconFactory.setColor(ContextCompat.getColor(DetailOrderActivity.this, R.color.markers_red_background));
-        googleMap.addMarker(markerOptions.position(position)
+        return googleMap.addMarker(markerOptions.position(position)
                 .icon(BitmapDescriptorFactory
                         .fromBitmap(iconFactory
                                 .makeIcon(getResources().getString(R.string.markers_driver_position)))));

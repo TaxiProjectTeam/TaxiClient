@@ -4,7 +4,6 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 
-import com.example.sveta.taxo.activity.MainActivity;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -21,7 +20,7 @@ public class AddressesConverter {
         List<Address> addresses = null;
         try {
             addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        } catch (IOException e) {}
+        } catch (Exception e) {}
         return addresses.get(0).getAddressLine(0);
     }
 
@@ -32,8 +31,7 @@ public class AddressesConverter {
             LatLng latLng = new LatLng(location.get(0).getLatitude(), location.get(0).getLongitude());
             return latLng;
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
         }
         return null;
     }

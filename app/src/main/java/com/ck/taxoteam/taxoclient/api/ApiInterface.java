@@ -1,6 +1,6 @@
-package com.example.sveta.taxo.api;
+package com.ck.taxoteam.taxoclient.api;
 
-import com.example.sveta.taxo.model.RouteResponse;
+import com.ck.taxoteam.taxoclient.model.RouteResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

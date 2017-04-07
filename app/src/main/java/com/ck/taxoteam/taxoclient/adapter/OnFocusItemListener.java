@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.adapter;
+package com.ck.taxoteam.taxoclient.adapter;
 
 
 /**

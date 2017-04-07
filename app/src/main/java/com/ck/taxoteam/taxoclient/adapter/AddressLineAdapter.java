@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.adapter;
+package com.ck.taxoteam.taxoclient.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
-import com.example.sveta.taxo.R;
-import com.example.sveta.taxo.model.ModelAddressLine;
+import com.ck.taxoteam.taxoclient.R;
+import com.ck.taxoteam.taxoclient.model.ModelAddressLine;
 
 import java.util.ArrayList;
 

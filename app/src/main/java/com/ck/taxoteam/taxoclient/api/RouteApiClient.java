@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.api;
+package com.ck.taxoteam.taxoclient.api;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

@@ -1,11 +1,11 @@
-package com.example.sveta.taxo.utility;
+package com.ck.taxoteam.taxoclient.utility;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-import com.example.sveta.taxo.activity.MainActivity;
-import com.example.sveta.taxo.adapter.AddressLineAdapter;
-import com.example.sveta.taxo.model.ModelAddressLine;
+import com.ck.taxoteam.taxoclient.activity.MainActivity;
+import com.ck.taxoteam.taxoclient.adapter.AddressLineAdapter;
+import com.ck.taxoteam.taxoclient.model.ModelAddressLine;
 
 /**
  * Created by Sveta on 02.02.2017.

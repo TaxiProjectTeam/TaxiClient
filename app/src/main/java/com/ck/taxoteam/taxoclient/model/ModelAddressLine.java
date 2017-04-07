@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.model;
+package com.ck.taxoteam.taxoclient.model;
 
 /**
  * Created by Sveta on 01.02.2017.

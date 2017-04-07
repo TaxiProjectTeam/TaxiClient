@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.adapter;
+package com.ck.taxoteam.taxoclient.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

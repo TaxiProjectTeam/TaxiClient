@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.model;
+package com.ck.taxoteam.taxoclient.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

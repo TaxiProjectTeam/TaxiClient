@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.activity;
+package com.ck.taxoteam.taxoclient.activity;
 
 import android.Manifest;
 import android.content.Intent;
@@ -24,17 +24,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.example.sveta.taxo.R;
-import com.example.sveta.taxo.adapter.AddressArrayAdapter;
-import com.example.sveta.taxo.adapter.AddressLineAdapter;
-import com.example.sveta.taxo.adapter.OnFocusItemListener;
-import com.example.sveta.taxo.api.ApiInterface;
-import com.example.sveta.taxo.api.RouteApiClient;
-import com.example.sveta.taxo.model.ModelAddressLine;
-import com.example.sveta.taxo.model.Order;
-import com.example.sveta.taxo.model.RouteResponse;
-import com.example.sveta.taxo.utility.AddressesConverter;
-import com.example.sveta.taxo.utility.SwipeHelper;
+import com.ck.taxoteam.taxoclient.R;
+import com.ck.taxoteam.taxoclient.adapter.AddressArrayAdapter;
+import com.ck.taxoteam.taxoclient.adapter.AddressLineAdapter;
+import com.ck.taxoteam.taxoclient.adapter.OnFocusItemListener;
+import com.ck.taxoteam.taxoclient.api.ApiInterface;
+import com.ck.taxoteam.taxoclient.api.RouteApiClient;
+import com.ck.taxoteam.taxoclient.model.ModelAddressLine;
+import com.ck.taxoteam.taxoclient.model.Order;
+import com.ck.taxoteam.taxoclient.model.RouteResponse;
+import com.ck.taxoteam.taxoclient.utility.AddressesConverter;
+import com.ck.taxoteam.taxoclient.utility.SwipeHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -403,8 +403,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (!connectionResult.isSuccess())
-            Toast.makeText(this, "Відсутнє з'єднання з інтернетом!!!", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -468,9 +466,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     pair.getValue().remove();
         }
         else
-            if (routes.size() > 0)
+            if (routes.size() > 0) {
                 for (Map.Entry<AddressLineAdapter.EditTypeViewHolder, Polyline> pair : routes.entrySet())
                     pair.getValue().remove();
+                distance = 0;
+                displayTotalPrice();
+            }
 
         if (startLat != null && startLng != null && destinationLat != null && destinationLng != null) {
             if (destinationPositions.size() > 1) {

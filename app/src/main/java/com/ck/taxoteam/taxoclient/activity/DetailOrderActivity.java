@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.activity;
+package com.ck.taxoteam.taxoclient.activity;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -16,12 +16,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.sveta.taxo.R;
-import com.example.sveta.taxo.api.ApiInterface;
-import com.example.sveta.taxo.api.RouteApiClient;
-import com.example.sveta.taxo.model.Driver;
-import com.example.sveta.taxo.model.Order;
-import com.example.sveta.taxo.model.RouteResponse;
+import com.ck.taxoteam.taxoclient.R;
+import com.ck.taxoteam.taxoclient.api.ApiInterface;
+import com.ck.taxoteam.taxoclient.api.RouteApiClient;
+import com.ck.taxoteam.taxoclient.model.Driver;
+import com.ck.taxoteam.taxoclient.model.Order;
+import com.ck.taxoteam.taxoclient.model.RouteResponse;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;

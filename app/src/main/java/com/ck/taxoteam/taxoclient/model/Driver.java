@@ -1,8 +1,6 @@
-package com.example.sveta.taxo.model;
+package com.ck.taxoteam.taxoclient.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
-
-import java.util.HashMap;
 
 /**
  * Created by Sveta on 20.02.2017.

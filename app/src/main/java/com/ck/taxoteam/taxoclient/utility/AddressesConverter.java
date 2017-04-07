@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.utility;
+package com.ck.taxoteam.taxoclient.utility;
 
 import android.content.Context;
 import android.location.Address;

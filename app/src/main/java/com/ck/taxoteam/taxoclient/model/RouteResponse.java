@@ -1,4 +1,4 @@
-package com.example.sveta.taxo.model;
+package com.ck.taxoteam.taxoclient.model;
 
 import com.google.gson.annotations.SerializedName;
 

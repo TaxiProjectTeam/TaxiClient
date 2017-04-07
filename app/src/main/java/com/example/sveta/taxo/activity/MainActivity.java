@@ -129,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
+        if (getIntent().getBooleanExtra("EXIT", false))
+            finish();
+
         if (googleApiClient == null) {
             googleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)

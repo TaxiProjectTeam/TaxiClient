@@ -3,6 +3,7 @@ package com.example.sveta.taxo.activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.RingtoneManager;
@@ -10,7 +11,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.sveta.taxo.R;
@@ -69,6 +72,8 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private String status;
     private Marker driverMarker;
     private Polyline polyline;
+    private String orderKey;
+    private NotificationManager notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +92,16 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
 
         routeApiInterface = RouteApiClient.getClient().create(ApiInterface.class);
 
-        String orderKey = getIntent().getStringExtra("orderKey");
+        orderKey = getIntent().getStringExtra("orderKey");
+
+        driverPhoneNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String phone = driverPhoneNumber.getText().toString();
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null));
+                startActivity(intent);
+            }
+        });
 
         databaseReference.child(ORDER_CHILD).child(orderKey).addValueEventListener(new ValueEventListener() {
             @Override
@@ -161,8 +175,33 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
             case (STATUS_READY):
                 orderStatus.setText(R.string.car_ready);
                 getNotification(getString(R.string.car_ready));
+                complete();
                 break;
         }
+    }
+
+    private void complete() {
+        new AlertDialog.Builder(this)
+                .setTitle(getResources().getString(R.string.dialog_order_completed_title))
+                .setMessage(getResources().getString(R.string.dialog_order_completed_message))
+                .setPositiveButton(getResources().getString(R.string.new_order), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(DetailOrderActivity.this, MainActivity.class);
+                        notificationManager.cancelAll();
+                        DetailOrderActivity.this.startActivity(intent);
+                    }
+                })
+                .setNegativeButton(getResources().getString(R.string.close), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(DetailOrderActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.putExtra("EXIT", true);
+                        notificationManager.cancelAll();
+                        DetailOrderActivity.this.startActivity(intent);
+                    }
+                }).show();
     }
 
     @Override
@@ -241,6 +280,8 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private void getNotification(String status) {
         Intent intent = new Intent(this, DetailOrderActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("orderKey", orderKey);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -253,7 +294,7 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
+        notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0, notificationBuilder.build());

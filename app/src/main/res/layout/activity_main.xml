@@ -5,7 +5,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.sveta.taxo.activity.MainActivity">
+    tools:context="com.ck.taxoteam.taxoclient.activity.MainActivity">
 
     <fragment
         android:id="@+id/map"

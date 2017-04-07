@@ -29,4 +29,6 @@
     <string name="dialog_order_completed_message">Дякуємо, що скористалися нашим сервісом! Вдалого Вам дня!</string>
     <string name="close">Закрити програму</string>
     <string name="new_order">Сворити нове замовлення</string>
+    <string name="network_down_snackbar_text">Відсутнє з\'єднання з Інтернетом</string>
+    <string name="action_open_wifi">Відкрити налаштування Wi-Fi</string>
 </resources>

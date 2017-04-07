@@ -5,15 +5,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ck.taxoteam.taxoclient.R;
@@ -22,6 +26,7 @@ import com.ck.taxoteam.taxoclient.api.RouteApiClient;
 import com.ck.taxoteam.taxoclient.model.Driver;
 import com.ck.taxoteam.taxoclient.model.Order;
 import com.ck.taxoteam.taxoclient.model.RouteResponse;
+import com.ck.taxoteam.taxoclient.reciver.NetworkStateReceiver;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -48,7 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailOrderActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class DetailOrderActivity extends AppCompatActivity implements OnMapReadyCallback, NetworkStateReceiver.NetworkStateReceiverListener {
     private static final String DRIVER_CHILD = "drivers";
     private static final String ORDER_CHILD = "orders";
     private static final int STATUS_WAITING = 11;
@@ -75,11 +80,16 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private Polyline polyline;
     private String orderKey;
     private NotificationManager notificationManager;
+    private RelativeLayout parent;
+    private NetworkStateReceiver networkStateReceiver;
+    private Snackbar networkStateSnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_order);
+
+        parent = (RelativeLayout) findViewById(R.id.details_activity_parent);
 
         driverName = (TextView) findViewById(R.id.driver_name);
         driverPhoneNumber = (TextView) findViewById(R.id.driver_phone_number);
@@ -171,6 +181,17 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        networkStateSnackbar = Snackbar.make(parent, getResources().getString(R.string.network_down_snackbar_text),Snackbar.LENGTH_INDEFINITE);
+        networkStateSnackbar.setAction(getResources().getText(R.string.action_open_wifi), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            }
+        });
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+
     }
 
     private void changeOrderStatus(int status) {
@@ -306,5 +327,17 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0, notificationBuilder.build());
+    }
+
+    @Override
+    public void networkAvailable() {
+        if(networkStateSnackbar.isShown()) {
+            networkStateSnackbar.dismiss();
+        }
+    }
+
+    @Override
+    public void networkUnavailable() {
+        networkStateSnackbar.show();
     }
 }

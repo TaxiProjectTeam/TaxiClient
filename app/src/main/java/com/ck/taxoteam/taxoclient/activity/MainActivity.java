@@ -2,11 +2,14 @@ package com.ck.taxoteam.taxoclient.activity;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,10 +23,10 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.ck.taxoteam.taxoclient.R;
 import com.ck.taxoteam.taxoclient.adapter.AddressArrayAdapter;
 import com.ck.taxoteam.taxoclient.adapter.AddressLineAdapter;
@@ -33,8 +36,10 @@ import com.ck.taxoteam.taxoclient.api.RouteApiClient;
 import com.ck.taxoteam.taxoclient.model.ModelAddressLine;
 import com.ck.taxoteam.taxoclient.model.Order;
 import com.ck.taxoteam.taxoclient.model.RouteResponse;
+import com.ck.taxoteam.taxoclient.reciver.NetworkStateReceiver;
 import com.ck.taxoteam.taxoclient.utility.AddressesConverter;
 import com.ck.taxoteam.taxoclient.utility.SwipeHelper;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -75,7 +80,8 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        NetworkStateReceiver.NetworkStateReceiverListener {
 
     private static final String ORDER_CHILD = "orders";
     private static final String PRICE_PER_KILOMETRES_KEY = "price_per_kilometres";
@@ -121,6 +127,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int duration;
     private boolean isTarget = false;
     private boolean isDefaultAddressInput = false;
+    private NetworkStateReceiver networkStateReceiver;
+    private Snackbar networkStateSnackbar;
+    private RelativeLayout mainView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         routeApiInterface = RouteApiClient.getClient().create(ApiInterface.class);
+
+        mainView = (RelativeLayout) findViewById(R.id.activity_main);
 
         total = (TextView) findViewById(R.id.total);
 
@@ -330,6 +341,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        networkStateSnackbar = Snackbar.make(mainView, getResources().getString(R.string.network_down_snackbar_text),Snackbar.LENGTH_INDEFINITE);
+        networkStateSnackbar.setAction(getResources().getText(R.string.action_open_wifi), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            }
+        });
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+
     }
 
     private void drawRoute() {
@@ -359,6 +381,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStop() {
         googleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        this.unregisterReceiver(networkStateReceiver);
+        super.onDestroy();
+    }
+
+    @Override
+    public void networkAvailable() {
+        if(networkStateSnackbar.isShown()) {
+            networkStateSnackbar.dismiss();
+        }
+    }
+
+    @Override
+    public void networkUnavailable() {
+        networkStateSnackbar.show();
     }
 
     @Override

@@ -26,7 +26,7 @@
     <string name="markers_end_label">Точка призначення</string>
     <string name="markers_driver_position">Водій</string>
     <string name="dialog_order_completed_title">Замовлення виконано</string>
-    <string name="dialog_order_completed_message">По закінченню поїздки не забудьте розрахуватися з водієм. Дякуєм, що скористалися нашим сервісом. Щасливої дороги!</string>
+    <string name="dialog_order_completed_message">Дякуємо, що скористалися нашим сервісом! Вдалого Вам дня!</string>
     <string name="close">Закрити програму</string>
     <string name="new_order">Сворити нове замовлення</string>
 </resources>

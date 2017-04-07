@@ -119,9 +119,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mapClick = false;
     private int distance;
     private int duration;
-    private int currentDistance;
-    private int currentDuration;
-    private boolean isTarget;
+    private boolean isTarget = false;
+    private boolean isDefaultAddressInput = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String address = viewHolder.editText.getText().toString();
                         String addressString = "Черкаси, Черкаська область, Україна, " + address;
-                        if (validateAddress(address) && !mapClick && !isTarget) {
+                        if (validateAddress(address) && !mapClick && !isTarget && !isDefaultAddressInput) {
                             LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
                             Marker marker;
                             if (viewHolder.getAdapterPosition() == 0)
@@ -196,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                 });
+                isDefaultAddressInput = false;
                 mapClick = false;
                 isTarget = false;
                 viewHolder.editText.setAdapter(addressArrayAdapter);
@@ -229,6 +229,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 getRoute();
                             }
                        }
+                       else if (validateAddress(editable.toString()) && !mapClick) {
+                            String address = editable.toString();
+                            String addressString = "Черкаси, Черкаська область, Україна, " + address;
+                            LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
+                            Marker marker;
+                            if (viewHolder.getAdapterPosition() == 0)
+                                marker = addStartMarker(latLng, address);
+                            else
+                                marker = addEndMarker(latLng, address);
+                            addAddressesToHashMap(latLng);
+                            deleteOldMarker(marker);
+                            getRoute();
+                            isDefaultAddressInput = true;
+                        }
                     }
                 });
             }
@@ -332,8 +346,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLngBounds latLngBounds = latLngBuilder.build();
         CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
         googleMap.moveCamera(track);
-        distance += currentDistance;
-        duration += currentDuration;
         deleteOldDrawingRoute(polyline);
     }
 
@@ -485,8 +497,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onResponse(Call<RouteResponse> call, Response<RouteResponse> response) {
                         RouteResponse routeResponse = response.body();
                         routePoints = PolyUtil.decode(routeResponse.getPoints());
-                        currentDistance = routeResponse.getDistance();
-                        currentDuration = routeResponse.getDuration();
+                        distance = routeResponse.getDistance();
                         drawRoute();
                         displayTotalPrice();
                     }

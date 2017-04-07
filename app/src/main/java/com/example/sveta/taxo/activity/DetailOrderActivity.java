@@ -53,6 +53,7 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     private static final String ORDER_CHILD = "orders";
     private static final int STATUS_WAITING = 11;
     private static final int STATUS_READY = 12;
+    private static final int STATUS_COMPLETE = 13;
     private DatabaseReference databaseReference;
     private TextView driverName;
     private TextView driverPhoneNumber;
@@ -138,11 +139,17 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
                                     driverMarker.remove();
                                 driverMarker = addEndMarker(driverPosition);
 
-                                if (status.equals("arrived"))
-                                    changeOrderStatus(STATUS_READY);
-                                else if (status.equals("accepted")) {
-                                    changeOrderStatus(STATUS_WAITING);
-                                    getRoute();
+                                switch (status) {
+                                    case "arrived":
+                                        changeOrderStatus(STATUS_READY);
+                                        break;
+                                    case "accepted":
+                                        changeOrderStatus(STATUS_WAITING);
+                                        getRoute();
+                                        break;
+                                    case "completed":
+                                        changeOrderStatus(STATUS_COMPLETE);
+                                        break;
                                 }
                             }
                             catch (Exception e) {
@@ -175,8 +182,9 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
             case (STATUS_READY):
                 orderStatus.setText(R.string.car_ready);
                 getNotification(getString(R.string.car_ready));
-                complete();
                 break;
+            case (STATUS_COMPLETE):
+                complete();
         }
     }
 

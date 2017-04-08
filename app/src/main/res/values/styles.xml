@@ -7,9 +7,8 @@
     </style>
 
     <style name="text_style">
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Medium</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Small</item>
         <item name="android:color">@color/text_color</item>
-        <item name="android:textStyle">bold</item>
         <item name="android:gravity">center</item>
     </style>
 

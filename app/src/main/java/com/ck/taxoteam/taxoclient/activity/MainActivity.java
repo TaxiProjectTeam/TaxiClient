@@ -266,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 totalPrice += 5;
-                String result = totalPrice + "";
+                String result = totalPrice + " грн.";
                 total.setText(result);
             }
         });
@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         String pricePerKilometres = firebaseRemoteConfig.getString(PRICE_PER_KILOMETRES_KEY);
         String startingPrice = firebaseRemoteConfig.getString(STARTING_PRICE_KEY);
         totalPrice = Integer.parseInt(pricePerKilometres) * distance / 1000 + Integer.parseInt(startingPrice);
-        String result = totalPrice + "";
+        String result = totalPrice + " грн.";
         total.setText(result);
     }
 

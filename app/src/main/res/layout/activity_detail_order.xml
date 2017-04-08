@@ -18,31 +18,6 @@
         app:cameraTargetLng="32.064271"
         />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/waiting_for_accept_order"
-        style="@style/text_style"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:id="@+id/order_status"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="@dimen/activity_vertical_margin" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/order_information"
-        style="@style/text_style"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:id="@+id/textView2"
-        android:layout_marginBottom="21dp"
-        android:layout_above="@+id/information"
-        android:layout_alignParentStart="true" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,13 +35,26 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="@string/cost_of_travel"
+                android:layout_marginBottom="4dp"
+                android:text="@string/label_order_status"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:text="@string/cost_of_travel"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                style="@style/text_style"
+                android:paddingRight="@dimen/activity_horizontal_margin"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:text="@string/driver_name"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
@@ -74,6 +62,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:text="@string/driver_phone_number"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
@@ -81,6 +71,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:text="@string/car_brand"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
@@ -88,6 +80,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:text="@string/car_color"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
@@ -95,6 +89,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:text="@string/car_number"
                 style="@style/text_style"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
@@ -108,7 +104,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="4dp"
+                android:text="@string/waiting_for_accept_order"
+                android:id="@+id/order_status"
+                android:textStyle="bold"
+                style="@style/text_style"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 tools:text="0 грн"
+                android:layout_marginBottom="4dp"
                 android:id="@+id/price_total"
                 style="@style/text_style"
                 />
@@ -117,6 +123,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="Василь"
+                android:layout_marginBottom="4dp"
                 android:id="@+id/driver_name"
                 style="@style/text_style"/>
 
@@ -124,6 +131,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="093-909-43-36"
+                android:layout_marginBottom="4dp"
                 android:id="@+id/driver_phone_number"
                 style="@style/text_style"/>
 
@@ -131,6 +139,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="Ford"
+                android:layout_marginBottom="4dp"
                 android:id="@+id/car_model"
                 style="@style/text_style"/>
 
@@ -138,6 +147,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 tools:text="Синій"
+                android:layout_marginBottom="4dp"
                 android:id="@+id/car_color"
                 style="@style/text_style"/>
 

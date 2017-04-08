@@ -1,5 +1,7 @@
 package com.ck.taxoteam.taxoclient.activity;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -16,6 +18,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -339,5 +342,42 @@ public class DetailOrderActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void networkUnavailable() {
         networkStateSnackbar.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(status.equals("free")) {
+            final Activity thisActivity = this;
+            new AlertDialog.Builder(this)
+                    .setTitle(getResources().getString(R.string.alert_dialog_title))
+                    .setMessage(getResources().getString(R.string.alert_dialog_message))
+                    .setPositiveButton(getResources().getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            databaseReference.child(ORDER_CHILD).child(orderKey).child("status").setValue("canceled");
+                            thisActivity.finish();
+                        }
+                    })
+                    .setNegativeButton(getResources().getString(R.string.button_no), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+        }
+        else{
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -8,7 +8,7 @@
     <string name="plus_5_uah">+5 грн</string>
     <string name="additional_comment">Додатковий коментар</string>
     <string name="order_information">Інформація про замовлення:</string>
-    <string name="waiting_for_accept_order">Зачекайте, ми шукаємо автомобіль для Вас</string>
+    <string name="waiting_for_accept_order">пошук водія...</string>
     <string name="cost_of_travel">Вартість поїздки:</string>
     <string name="driver_name">Ім\'я водія:</string>
     <string name="driver_phone_number">Номер телефону:</string>
@@ -20,7 +20,7 @@
     <string name="latitude">latitude</string>
     <string name="longitude">longitude</string>
     <string name="your_location">Ви знаходитесь тут</string>
-    <string name="waiting_for_car">Зачекайте, водій вже прямує до Вас</string>
+    <string name="waiting_for_car">прийняте, очікуйте</string>
     <string name="car_ready">Водій вже прибув до Вас</string>
     <string name="markers_start_label">Початок руху</string>
     <string name="markers_end_label">Точка призначення</string>
@@ -31,4 +31,9 @@
     <string name="new_order">Сворити нове замовлення</string>
     <string name="network_down_snackbar_text">Відсутнє з\'єднання з Інтернетом</string>
     <string name="action_open_wifi">Відкрити налаштування Wi-Fi</string>
+    <string name="label_order_status">Статус замовлення:</string>
+    <string name="alert_dialog_title">Попередження</string>
+    <string name="alert_dialog_message">Водій ще не знайшовся. Відмінити замовлення?</string>
+    <string name="button_yes">Так</string>
+    <string name="button_no">Ні</string>
 </resources>

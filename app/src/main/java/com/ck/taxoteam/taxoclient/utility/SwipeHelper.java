@@ -2,10 +2,13 @@ package com.ck.taxoteam.taxoclient.utility;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.widget.EditText;
 
 import com.ck.taxoteam.taxoclient.activity.MainActivity;
 import com.ck.taxoteam.taxoclient.adapter.AddressLineAdapter;
 import com.ck.taxoteam.taxoclient.model.ModelAddressLine;
+
+import java.util.HashMap;
 
 /**
  * Created by Sveta on 02.02.2017.
@@ -39,6 +42,7 @@ public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         if (activity.markers.get(viewHolder) != null) {
             activity.markers.get(viewHolder).remove();
             activity.routes.get(viewHolder).remove();
+            activity.destinationPositions.remove(pos - 1);
             activity.getRoute();
         }
     }

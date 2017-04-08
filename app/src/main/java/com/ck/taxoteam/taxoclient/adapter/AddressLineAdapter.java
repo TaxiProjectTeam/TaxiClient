@@ -34,7 +34,7 @@ public class AddressLineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View v) {
-            dataSet.add(getItemCount() - 1, new ModelAddressLine(ModelAddressLine.EDIT_TYPE, "Куди"));
+            dataSet.add(getItemCount() - 1, new ModelAddressLine(ModelAddressLine.EDIT_TYPE, context.getString(R.string.destination_address)));
             notifyItemInserted(getItemCount() - 2);
         }
     }

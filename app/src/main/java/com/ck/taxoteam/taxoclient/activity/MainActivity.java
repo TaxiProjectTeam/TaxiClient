@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -122,11 +123,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private List<LatLng> routePoints = new ArrayList<>();
     private int totalPrice;
-    private boolean mapClick = false;
     private int distance;
-    private int duration;
-    private boolean isTarget = false;
-    private boolean isDefaultAddressInput = false;
     private NetworkStateReceiver networkStateReceiver;
     private Snackbar networkStateSnackbar;
     private RelativeLayout mainView;
@@ -188,27 +185,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onItemFocus(int position) {
                 viewHolder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
-                viewHolder.editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String address = viewHolder.editText.getText().toString();
-                        String addressString = "Черкаси, Черкаська область, Україна, " + address;
-                        if (validateAddress(address) && !mapClick && !isTarget && !isDefaultAddressInput) {
-                            LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
-                            Marker marker;
-                            if (viewHolder.getAdapterPosition() == 0)
-                                marker = addStartMarker(latLng, address);
-                            else
-                                marker = addEndMarker(latLng, address);
-                            addAddressesToHashMap(latLng);
-                            deleteOldMarker(marker);
-                            getRoute();
-                        }
-                    }
-                });
-                isDefaultAddressInput = false;
-                mapClick = false;
-                isTarget = false;
+
                 viewHolder.editText.setAdapter(addressArrayAdapter);
 
                 viewHolder.editText.addTextChangedListener(new TextWatcher() {
@@ -224,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     @Override
                     public void afterTextChanged(Editable editable) {
+                        viewHolder.editText.setTextColor(Color.BLACK);
                         if (editable.toString().equals("")) {
                             if (markers.get(viewHolder) != null)
                                 markers.get(viewHolder).remove();
@@ -240,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 getRoute();
                             }
                        }
-                       else if (validateAddress(editable.toString()) && !mapClick) {
+                       else if (validateAddress(editable.toString())) {
                             String address = editable.toString();
                             String addressString = "Черкаси, Черкаська область, Україна, " + address;
                             LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
@@ -252,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             addAddressesToHashMap(latLng);
                             deleteOldMarker(marker);
                             getRoute();
-                            isDefaultAddressInput = true;
                         }
                     }
                 });
@@ -267,20 +244,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         targetLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isTarget = true;
                 if (mapReady) {
                     if (viewHolder != null && viewHolder.getAdapterPosition() == 0) {
                         geoPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                         String address = AddressesConverter.getAddressFromLocation(getApplicationContext(), geoPosition);
-                        Marker marker = addStartMarker(geoPosition, address);
 
                         CameraPosition camera = CameraPosition.builder().target(geoPosition).zoom(17).build();
                         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camera));
 
                         viewHolder.editText.setText(address);
-                        addAddressesToHashMap(geoPosition);
-                        deleteOldMarker(marker);
-                        getRoute();
                     }
                 }
             }
@@ -311,10 +283,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .findViewHolderForAdapterPosition(i);
 
                     String ad = holder.editText.getText().toString();
-                    if (holder.editText == null || holder.editText.getText().toString().equals(""))
+                    if (holder.editText == null || holder.editText.getText().toString().equals("")) {
                         isEmpty = true;
-                    else if (!validateAddress(ad))
+                        holder.editText.requestFocus();
+                    }
+                    else if (!validateAddress(ad)) {
                         isCorrectAddress = true;
+                        holder.editText.requestFocus();
+                        holder.editText.setTextColor(Color.RED);
+                    }
                 }
 
                 if (isEmpty)
@@ -410,17 +387,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                Marker marker;
                 String address = AddressesConverter.getAddressFromLocation(getApplicationContext(), latLng);
-                if (viewHolder.getAdapterPosition() == 0)
-                    marker = addStartMarker(latLng, address);
-                else
-                    marker = addEndMarker(latLng, address);
                 viewHolder.editText.setText(address);
-                addAddressesToHashMap(latLng);
-                deleteOldMarker(marker);
-                getRoute();
-                mapClick = true;
             }
         });
     }
@@ -460,7 +428,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
-            destinationPositions.add(destinationPositionCoords);
+            //TODO:
+            if (destinationPositions.size() == 0)
+                destinationPositions.add(destinationPositionCoords);
+            else
+                destinationPositions.set(viewHolder.getAdapterPosition() - 1, destinationPositionCoords);
         }
     }
 

@@ -20,7 +20,11 @@ public class AddressesConverter {
         try {
             addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
         } catch (Exception e) {}
-        return addresses.get(0).getAddressLine(0);
+        if (addresses != null) {
+            return addresses.get(0).getAddressLine(0);
+        }
+        else
+            return "";
     }
 
     public static LatLng getLocationFromAddress(Context context, String address) {

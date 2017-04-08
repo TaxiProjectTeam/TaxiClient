@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -20,7 +19,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -184,55 +182,55 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         adapter.setOnFocusItemListener(new OnFocusItemListener() {
             @Override
             public void onItemFocus(int position) {
-                viewHolder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+                try {
+                    viewHolder = (AddressLineAdapter.EditTypeViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
 
-                viewHolder.editText.setAdapter(addressArrayAdapter);
+                    viewHolder.editText.setAdapter(addressArrayAdapter);
 
-                viewHolder.editText.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    viewHolder.editText.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable editable) {
-                        viewHolder.editText.setTextColor(Color.BLACK);
-                        if (editable.toString().equals("")) {
-                            if (markers.get(viewHolder) != null)
-                                markers.get(viewHolder).remove();
-
-                            if (routes.get(viewHolder) != null)
-                                routes.get(viewHolder).remove();
-
-                            if (viewHolder.getAdapterPosition() == 0) {
-                                startPosition.clear();
-                                getRoute();
-                            }
-                            else if (destinationPositions.size() != 0) {
-                                destinationPositions.remove(viewHolder.getAdapterPosition() - 1);
-                                getRoute();
-                            }
-                       }
-                       else if (validateAddress(editable.toString())) {
-                            String address = editable.toString();
-                            String addressString = "Черкаси, Черкаська область, Україна, " + address;
-                            LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
-                            Marker marker;
-                            if (viewHolder.getAdapterPosition() == 0)
-                                marker = addStartMarker(latLng, address);
-                            else
-                                marker = addEndMarker(latLng, address);
-                            addAddressesToHashMap(latLng);
-                            deleteOldMarker(marker);
-                            getRoute();
                         }
-                    }
-                });
+
+                        @Override
+                        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable editable) {
+                            viewHolder.editText.setTextColor(Color.BLACK);
+                            if (editable.toString().equals("")) {
+                                if (markers.get(viewHolder) != null)
+                                    markers.get(viewHolder).remove();
+
+                                if (routes.get(viewHolder) != null)
+                                    routes.get(viewHolder).remove();
+
+                                if (viewHolder.getAdapterPosition() == 0) {
+                                    startPosition.clear();
+                                    getRoute();
+                                } else if (destinationPositions.size() != 0) {
+                                    destinationPositions.remove(viewHolder.getAdapterPosition() - 1);
+                                    getRoute();
+                                }
+                            } else if (validateAddress(editable.toString())) {
+                                String address = editable.toString();
+                                String addressString = "Черкаси, Черкаська область, Україна, " + address;
+                                LatLng latLng = AddressesConverter.getLocationFromAddress(getApplicationContext(), addressString);
+                                Marker marker;
+                                if (viewHolder.getAdapterPosition() == 0)
+                                    marker = addStartMarker(latLng, address);
+                                else
+                                    marker = addEndMarker(latLng, address);
+                                addAddressesToHashMap(latLng);
+                                deleteOldMarker(marker);
+                                getRoute();
+                            }
+                        }
+                    });
+                } catch (ClassCastException e) {}
             }
         });
 
@@ -428,11 +426,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
-            //TODO:
-            if (destinationPositions.size() == 0)
+            if (destinationPositions.size() <= viewHolder.getAdapterPosition() - 1)
                 destinationPositions.add(destinationPositionCoords);
             else
-                destinationPositions.set(viewHolder.getAdapterPosition() - 1, destinationPositionCoords);
+                destinationPositions.add(0, destinationPositionCoords);
         }
     }
 
@@ -458,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         String pricePerKilometres = firebaseRemoteConfig.getString(PRICE_PER_KILOMETRES_KEY);
         String startingPrice = firebaseRemoteConfig.getString(STARTING_PRICE_KEY);
         totalPrice = Integer.parseInt(pricePerKilometres) * distance / 1000 + Integer.parseInt(startingPrice);
-        String result = totalPrice + " грн.";
+        String result = totalPrice + "";
         total.setText(result);
     }
 

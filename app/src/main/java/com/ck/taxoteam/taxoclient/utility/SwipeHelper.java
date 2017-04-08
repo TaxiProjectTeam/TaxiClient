@@ -42,7 +42,6 @@ public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         if (activity.markers.get(viewHolder) != null) {
             activity.markers.get(viewHolder).remove();
             activity.routes.get(viewHolder).remove();
-            activity.destinationPositions.remove(pos - 1);
             activity.getRoute();
         }
     }

@@ -8,7 +8,7 @@
     <string name="plus_5_uah">+5 грн</string>
     <string name="additional_comment">Додатковий коментар</string>
     <string name="order_information">Інформація про замовлення:</string>
-    <string name="waiting_for_accept_order">пошук водія...</string>
+    <string name="waiting_for_accept_order">Пошук водія…</string>
     <string name="cost_of_travel">Вартість поїздки:</string>
     <string name="driver_name">Ім\'я водія:</string>
     <string name="driver_phone_number">Номер телефону:</string>
@@ -20,7 +20,7 @@
     <string name="latitude">latitude</string>
     <string name="longitude">longitude</string>
     <string name="your_location">Ви знаходитесь тут</string>
-    <string name="waiting_for_car">прийняте, очікуйте</string>
+    <string name="waiting_for_car">Ваше замовлення прийняте, очікуйте</string>
     <string name="car_ready">Водій вже прибув до Вас</string>
     <string name="markers_start_label">Початок руху</string>
     <string name="markers_end_label">Точка призначення</string>

@@ -2,13 +2,10 @@ package com.ck.taxoteam.taxoclient.utility;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.widget.EditText;
 
 import com.ck.taxoteam.taxoclient.activity.MainActivity;
 import com.ck.taxoteam.taxoclient.adapter.AddressLineAdapter;
 import com.ck.taxoteam.taxoclient.model.ModelAddressLine;
-
-import java.util.HashMap;
 
 /**
  * Created by Sveta on 02.02.2017.
@@ -16,17 +13,15 @@ import java.util.HashMap;
 
 public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
-    AddressLineAdapter adapter;
-    MainActivity activity;
+    private AddressLineAdapter adapter;
 
     public SwipeHelper(int dragDirs, int swipeDirs) {
         super(dragDirs, swipeDirs);
     }
 
-    public SwipeHelper(AddressLineAdapter adapter, MainActivity activity) {
+    public SwipeHelper(AddressLineAdapter adapter) {
         super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
         this.adapter = adapter;
-        this.activity = activity;
     }
 
     @Override
@@ -39,10 +34,9 @@ public class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         int pos = viewHolder.getAdapterPosition();
         adapter.deleteAddress(pos);
         ((AddressLineAdapter.EditTypeViewHolder) viewHolder).editText.setText("");
-        if (activity.markers.get(viewHolder) != null) {
-            activity.markers.get(viewHolder).remove();
-            activity.routes.get(viewHolder).remove();
-            activity.getRoute();
+        if (MainActivity.markers.get(viewHolder) != null) {
+            MainActivity.markers.get(viewHolder).remove();
+            MainActivity.routes.get(viewHolder).remove();
         }
     }
 

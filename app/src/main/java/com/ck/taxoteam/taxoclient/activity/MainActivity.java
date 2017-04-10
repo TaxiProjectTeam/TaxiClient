@@ -114,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private AddressLineAdapter adapter;
     private ArrayList<ModelAddressLine> modelAddressLines;
     private AddressLineAdapter.EditTypeViewHolder viewHolder;
-    public HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
-    public HashMap<AddressLineAdapter.EditTypeViewHolder, Polyline> routes = new HashMap<>();
+    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Marker> markers = new HashMap<>();
+    public static HashMap<AddressLineAdapter.EditTypeViewHolder, Polyline> routes = new HashMap<>();
     private HashMap<String, Double> startPosition = new HashMap<>();
     public ArrayList<HashMap<String, Double>> destinationPositions = new ArrayList<>();
 
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        ItemTouchHelper.Callback callback = new SwipeHelper(adapter, this);
+        ItemTouchHelper.Callback callback = new SwipeHelper(adapter);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(recyclerView);
 
@@ -426,10 +426,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             HashMap<String, Double> destinationPositionCoords = new HashMap<>();
             destinationPositionCoords.put(getString(R.string.latitude), latLng.latitude);
             destinationPositionCoords.put(getString(R.string.longitude), latLng.longitude);
-            if (destinationPositions.size() <= viewHolder.getAdapterPosition() - 1)
-                destinationPositions.add(destinationPositionCoords);
-            else
-                destinationPositions.add(0, destinationPositionCoords);
+            destinationPositions.add(destinationPositionCoords);
         }
     }
 

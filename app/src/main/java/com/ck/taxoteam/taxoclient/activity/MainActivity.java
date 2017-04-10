@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 totalPrice += 5;
-                String result = totalPrice + " грн.";
+                String result = totalPrice + "";
                 total.setText(result);
             }
         });
